@@ -13,103 +13,189 @@ export default function Home() {
   const [showResult, setShowResult] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
 
+  // Load history dari localStorage pas buka web
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('recentLinks') || '[]');
     setRecentLinks(saved);
   }, []);
 
-  const showToast = (message, type) => {
+  // Fungsi Toast Notifikasi (Gantiin showToast manual)
+  const triggerToast = (message, type) => {
     setToast({ show: true, msg: message, type });
     setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000);
   };
 
-  // FUNGSI DOWNLOAD QR LOKAL (Pake library dari layout)
-  const downloadQRLokal = (linkShort, slug) => {
-    // Cari wadah sementara
-    const div = document.createElement("div");
-    new window.QRCode(div, {
-      text: linkShort,
-      width: 500,
-      height: 500
-    });
+  // Logic Shorten (Gantiin processLink manual)
+  const handleShorten = async () => {
+    const input = url.trim().toLowerCase();
+    if (!input) return triggerToast("Mohon isi URL terlebih dahulu!", "error");
 
-    // Tunggu sebentar sampe library beres gambar
-    setTimeout(() => {
-      const img = div.querySelector("img");
-      if (img) {
-        const a = document.createElement("a");
-        a.href = img.src;
-        a.download = `QR-${slug}.png`;
-        a.click();
-        showToast("QR Berhasil Diunduh!", "success");
-      } else {
-        showToast("Gagal generate QR!", "error");
-      }
-    }, 100);
-  };
+    const blacklist = ["localhost", "127.0.0.1", "tes.vercel.app", window.location.hostname.toLowerCase()];
+    if (blacklist.some(kata => input.includes(kata))) {
+      return triggerToast("Link ini dilarang!", "error");
+    }
 
-  const processLink = async () => {
-    if (!url) return showToast("Isi URL-nya, Bos!", "error");
     setLoading(true);
     const slug = Math.random().toString(36).substring(2, 7);
     const fullLink = `${window.location.origin}/${slug}`;
 
-    const { error } = await supabase.from('links').insert([{ original_url: url, slug: slug, clicks: 0 }]);
+    const { error } = await supabase
+      .from('links')
+      .insert([{ original_url: url, slug: slug, clicks: 0 }]);
 
-    if (!error) {
+    if (error) {
+      triggerToast("Gagal menyimpan ke database!", "error");
+    } else {
       setHasil(fullLink);
       setShowResult(true);
       const newRecent = [{ original: url, short: fullLink, slug: slug }, ...recentLinks].slice(0, 5);
       setRecentLinks(newRecent);
       localStorage.setItem('recentLinks', JSON.stringify(newRecent));
-      showToast("Link Jadi!", "success");
+      triggerToast("Link berhasil dibuat!", "success");
     }
     setLoading(false);
+  };
+
+  const copyText = (text) => {
+    navigator.clipboard.writeText(text);
+    triggerToast("Berhasil disalin!", "success");
+  };
+
+  const downloadQR = (link, slug) => {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
+    fetch(qrUrl).then(res => res.blob()).then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `QR-ShortPro-${slug}.png`;
+      a.click();
+      triggerToast("QR Code diunduh!", "success");
+    });
   };
 
   return (
     <>
       <Header />
-      <main className="container">
-        {/* Template Input lo di sini */}
-        <div className="input-wrapper">
-          {!showResult ? (
-            <div className="input-box">
-              <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste URL..." />
-              <button onClick={processLink} className="btn-black">{loading ? '...' : 'Shorten'}</button>
-            </div>
-          ) : (
-            <div className="result-box" style={{display:'flex'}}>
-              <span className="result-text">{hasil}</span>
-              <button onClick={() => {navigator.clipboard.writeText(hasil); showToast("Copied!", "success")}}>Copy</button>
-              <button onClick={() => setShowResult(false)}>Reset</button>
-            </div>
-          )}
+      <main>
+        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          
+          <div className="hero-text">
+            <h1>Shorten URLs,<br />Expand Reach.</h1>
+            <p className="subtitle">Aplikasi pemendek tautan profesional. Masukkan link panjang di bawah.</p>
+          </div>
+
+          <div className="input-wrapper">
+            {/* INPUT STATE */}
+            {!showResult ? (
+              <div className="input-box">
+                <input 
+                  type="url" 
+                  value={url} 
+                  onChange={(e) => setUrl(e.target.value)} 
+                  placeholder="Tempel URL panjang di sini..." 
+                />
+                <button className="btn-black" onClick={handleShorten} disabled={loading}>
+                  {loading ? '...' : 'Shorten'}
+                  <span className="material-symbols-rounded">arrow_forward</span>
+                </button>
+              </div>
+            ) : (
+              /* RESULT STATE */
+              <div className="result-box" style={{ display: 'flex' }}>
+                <span className="material-symbols-rounded" style={{ color: 'var(--accent)' }}>check_circle</span>
+                <span className="result-text">{hasil}</span>
+                <button className="btn-black copy" style={{ background: 'var(--accent)' }} onClick={() => copyText(hasil)}>
+                  Copy Link
+                </button>
+                <button className="btn-icon" onClick={() => setShowResult(false)}>
+                  <span className="material-symbols-rounded">refresh</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="recent-section">
+            <span className="section-label">Your Recent Links:</span>
+            {recentLinks.map((item, index) => (
+              <div key={index} className="link-row">
+                <div className="link-info">
+                  <a href={item.short} target="_blank" className="short">{item.short.replace(/^https?:\/\//, '')}</a>
+                  <span className="long">{item.original}</span>
+                </div>
+                <div className="actions">
+                  <button className="btn-icon" title="Copy" onClick={() => copyText(item.short)}>
+                    <span className="material-symbols-rounded">content_copy</span>
+                  </button>
+                  <button className="btn-icon" title="QR Code" onClick={() => downloadQR(item.short, item.slug)}>
+                    <span className="material-symbols-rounded">qr_code_2</span>
+                  </button>
+                  <Link href={`/stats?slug=${item.slug}`} className="btn-icon" title="Analytics">
+                    <span className="material-symbols-rounded">bar_chart</span>
+                  </Link>
+                  <button className="btn-icon" title="View URL" onClick={() => window.open(item.original, '_blank')}>
+                    <span className="material-symbols-rounded">open_in_new</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Recent Links Sesuai Template lo */}
-        <div className="recent-section">
-          {recentLinks.map((item, i) => (
-            <div key={i} className="link-row">
-              <div className="link-info">
-                <span className="short">{item.short}</span>
+        {/* PREMIUM BOX */}
+        <div className="premium-box">
+          <div className="premium-content">
+            <div className="premium-header">
+              <span className="material-symbols-rounded icon-star">verified</span>
+              <h3>Want More? Try Premium Features!</h3>
+            </div>
+            <p className="premium-desc">Custom short links, powerful dashboard, detailed analytics, API, UTM builder, QR codes, browser extension, app integrations and support.</p>
+          </div>
+          <button className="btn-black btn-cta" onClick={() => window.location.href='/register'}>Start Free</button>
+        </div>
+
+        {/* CONTENT BOTTOM */}
+        <div className="content-wrapper-bottom">
+          <div className="article-white-box">
+            <div className="article-inner">
+              <div className="article-item">
+                <h3>How URL Shorteners Work</h3>
+                <p>Our system works as a smart middleman: we securely store your long links and exchange them for short aliases. When the short link is clicked, our servers will redirect the visitor directly to the original destination without any delay.</p>
               </div>
-              <div className="actions">
-                <button onClick={() => downloadQRLokal(item.short, item.slug)} className="btn-icon" title="Download QR">
-                  <span className="material-symbols-rounded">qr_code_2</span>
-                </button>
-                <Link href={`/stats?slug=${item.slug}`} className="btn-icon">
-                  <span className="material-symbols-rounded">bar_chart</span>
-                </Link>
+              <div className="article-item">
+                <h3>Simple and fast URL shortener!</h3>
+                <p>ShortPro allows to shorten long links from Instagram, Facebook, YouTube, Twitter, Linked In, WhatsApp, TikTok, blogs and any domain name.</p>
+              </div>
+              <div className="article-item">
+                <h3>Shorten, share and track</h3>
+                <p>Your shortened URLs can be used in publications, documents, advertisements, blogs, forums, and other locations. Track statistics for your business.</p>
               </div>
             </div>
-          ))}
+          </div>
+
+          <div className="feature-grid-fixed">
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
+              <h4>Easy</h4><p>ShortURL is easy and fast, enter long link to get short link</p>
+            </div>
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div>
+              <h4>Shortened</h4><p>Use any link, no matter what size, ShortURL always shortens</p>
+            </div>
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+              <h4>Secure</h4><p>Fast and secure, HTTPS protocol and data encryption</p>
+            </div>
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+              <h4>Statistics</h4><p>Check the number of clicks that your URL received</p>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
-      
-      {/* Toast Notification */}
-      <div className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
+
+      {/* Toast Notif Sesuai State */}
+      <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
+        <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
         <span>{toast.msg}</span>
       </div>
     </>
