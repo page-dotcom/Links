@@ -10,9 +10,11 @@ export default function Home() {
   const gaskeun = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
+    // Bikin slug 5 digit
     const slugAcak = Math.random().toString(36).substring(2, 7);
     
-    // Pastiin tetep pake 'slug' sesuai database baru lo
+    // Simpan ke kolom 'slug' sesuai database lo
     const { error } = await supabase
       .from('links')
       .insert([{ original_url: url, slug: slugAcak, clicks: 0 }]);
@@ -27,7 +29,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '20px' }}>{"URL Shortener & QR"}</h1>
+      <h1>{"URL Shortener & QR"}</h1>
       
       <form onSubmit={gaskeun} style={{ marginBottom: '30px' }}>
         <input 
@@ -40,7 +42,7 @@ export default function Home() {
         />
         <button 
           type="submit" 
-          disabled={loading} 
+          disabled={loading}
           style={{ padding: '12px 20px', marginLeft: '10px', cursor: 'pointer', background: '#0070f3', color: '#fff', border: 'none', borderRadius: '5px' }}
         >
           {loading ? '...' : 'Shorten'}
@@ -48,21 +50,19 @@ export default function Home() {
       </form>
 
       {hasil && (
-        <div style={{ marginTop: '20px', border: '1px solid #ddd', padding: '30px', display: 'inline-block', borderRadius: '10px', background: '#fff' }}>
+        <div style={{ marginTop: '20px', border: '1px solid #ddd', padding: '30px', display: 'inline-block', borderRadius: '10px' }}>
           <p style={{ marginBottom: '10px' }}>{"Link Berhasil Dibuat:"}</p>
-          <a href={hasil} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold', color: '#0070f3', fontSize: '1.1rem' }}>
+          <a href={hasil} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold', color: '#0070f3' }}>
             {hasil}
           </a>
           
-          <div style={{ marginTop: '25px' }}>
-            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '10px' }}>{"Scan QR Code:"}</p>
-            {/* Gue tambahin encodeURIComponent biar URL-nya kebaca bener sama Google API */}
+          <div style={{ marginTop: '20px' }}>
+            <p>{"Scan QR Code:"}</p>
+            {/* Pake encodeURIComponent biar URL link-nya kebaca bener ama Google */}
             <img 
               src={`https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(hasil)}`} 
               alt="QR Code" 
-              style={{ border: '1px solid #eee', padding: '10px', background: '#fff' }}
-              onLoad={() => console.log("QR Loaded")}
-              onError={(e) => { e.target.src = "https://via.placeholder.com/200?text=QR+Error"; }}
+              style={{ border: '1px solid #eee', padding: '10px', marginTop: '10px' }}
             />
           </div>
         </div>
