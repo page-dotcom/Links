@@ -13,17 +13,19 @@ export default function Home() {
   const [showResult, setShowResult] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
 
-  // Load history dari localStorage
+  // Load history pas pertama kali buka
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('recentLinks') || '[]');
     setRecentLinks(saved);
   }, []);
 
+  // Fungsi Toast (Gantiin showToast manual lo)
   const triggerToast = (message, type) => {
     setToast({ show: true, msg: message, type });
     setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000);
   };
 
+  // Logic Shorten (Gantiin processLink manual lo)
   const handleShorten = async () => {
     const input = url.trim().toLowerCase();
     if (!input) return triggerToast("Mohon isi URL terlebih dahulu!", "error");
@@ -42,7 +44,7 @@ export default function Home() {
       .insert([{ original_url: url, slug: slug, clicks: 0 }]);
 
     if (error) {
-      triggerToast("Gagal simpan ke database!", "error");
+      triggerToast("Gagal menyimpan ke database!", "error");
     } else {
       setHasil(fullLink);
       setShowResult(true);
@@ -82,7 +84,7 @@ export default function Home() {
           </div>
 
           <div className="input-wrapper">
-            {/* STATE INPUT (Logic Tampilan Input) */}
+            {/* Template Input Box Lo */}
             {!showResult ? (
               <div id="state-input" className="input-box">
                 <input 
@@ -90,6 +92,7 @@ export default function Home() {
                   value={url} 
                   onChange={(e) => setUrl(e.target.value)} 
                   placeholder="Tempel URL panjang di sini..." 
+                  required 
                 />
                 <button className="btn-black" onClick={handleShorten} disabled={loading}>
                   {loading ? '...' : 'Shorten'}
@@ -97,7 +100,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              /* STATE RESULT (Logic Tampilan Hasil) */
+              /* Template Result Box Lo */
               <div id="state-result" className="result-box" style={{ display: 'flex' }}>
                 <span className="material-symbols-rounded" style={{ color: 'var(--accent)' }}>check_circle</span>
                 <span id="finalLink" className="result-text">{hasil}</span>
@@ -111,64 +114,92 @@ export default function Home() {
             )}
           </div>
 
+          {/* Bagian Recent Links - Gue mapping biar gak manual */}
           <div className="recent-section">
             <span className="section-label">Your Recent Links:</span>
-            {recentLinks.length === 0 ? (
-              <p style={{ color: '#999', fontSize: '14px', marginTop: '10px' }}>Belum ada link terbaru.</p>
-            ) : (
-              recentLinks.map((item, index) => (
-                <div key={index} className="link-row">
-                  <div className="link-info">
-                    <a href={item.short} target="_blank" className="short">{item.short.replace(/^https?:\/\//, '')}</a>
-                    <span className="long">{item.original}</span>
-                  </div>
-                  <div className="actions">
-                    <button className="btn-icon" title="Copy" onClick={() => copyText(item.short)}>
-                      <span className="material-symbols-rounded">content_copy</span>
-                    </button>
-                    <button className="btn-icon" title="QR Code" onClick={() => downloadQR(item.short, item.slug)}>
-                      <span className="material-symbols-rounded">qr_code_2</span>
-                    </button>
-                    <Link href={`/stats?slug=${item.slug}`} className="btn-icon" title="Analytics">
-                      <span className="material-symbols-rounded">bar_chart</span>
-                    </Link>
-                    <button className="btn-icon" title="View URL" onClick={() => window.open(item.original, '_blank')}>
-                      <span className="material-symbols-rounded">open_in_new</span>
-                    </button>
-                  </div>
+            {recentLinks.map((item, index) => (
+              <div key={index} className="link-row">
+                <div className="link-info">
+                  <a href={item.short} target="_blank" className="short">{item.short.replace(/^https?:\/\//, '')}</a>
+                  <span className="long">{item.original}</span>
                 </div>
-              ))
-            )}
+                <div className="actions">
+                  <button className="btn-icon" title="Copy" onClick={() => copyText(item.short)}>
+                    <span className="material-symbols-rounded">content_copy</span>
+                  </button>
+                  <button className="btn-icon" title="QR Code" onClick={() => downloadQR(item.short, item.slug)}>
+                    <span className="material-symbols-rounded">qr_code_2</span>
+                  </button>
+                  <Link href={`/stats?slug=${item.slug}`} className="btn-icon" title="Analytics">
+                    <span className="material-symbols-rounded">bar_chart</span>
+                  </Link>
+                  <button className="btn-icon" title="View URL" onClick={() => window.open(item.original, '_blank')}>
+                    <span className="material-symbols-rounded">open_in_new</span>
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* --- Bagian Konten Bawah (Tetap Utuh sesuai Template Lo) --- */}
+        {/* --- Area Premium Box Lo --- */}
         <div className="premium-box">
           <div className="premium-content">
             <div className="premium-header">
               <span className="material-symbols-rounded icon-star">verified</span>
               <h3>Want More? Try Premium Features!</h3>
             </div>
-            <p className="premium-desc">Custom short links, dashboard, analytics, API, UTM builder, and support.</p>
+            <p className="premium-desc">
+              Custom short links, powerful dashboard, detailed analytics, API, UTM builder, QR codes, browser extension, app integrations and support.
+            </p>
           </div>
-          <button className="btn-black btn-cta">Start Free</button>
+          <button className="btn-black btn-cta" onClick={() => window.location.href='/register'}>
+            Start Free
+          </button>
         </div>
 
+        {/* --- Area Artikel & Fitur Lo (Gak gue sentuh) --- */}
         <div className="content-wrapper-bottom">
           <div className="article-white-box">
             <div className="article-inner">
               <div className="article-item">
                 <h3>How URL Shorteners Work</h3>
-                <p>Our system stores your long links and exchanges them for short aliases.</p>
+                <p>Our system works as a smart middleman: we securely store your long links and exchange them for short aliases.</p>
+              </div>
+              <div className="article-item">
+                <h3>Simple and fast URL shortener!</h3>
+                <p>ShortPro allows to shorten long links from Instagram, Facebook, YouTube, Twitter, and more.</p>
+              </div>
+              <div className="article-item">
+                <h3>Shorten, share and track</h3>
+                <p>Track statistics for your business by monitoring the number of hits with our click counter.</p>
               </div>
             </div>
           </div>
-          {/* Feature Grid Dll taruh di sini */}
+
+          <div className="feature-grid-fixed">
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
+              <h4>Easy</h4><p>ShortURL is easy and fast, enter long link to get short link</p>
+            </div>
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div>
+              <h4>Shortened</h4><p>Use any link, no matter what size, ShortURL always shortens</p>
+            </div>
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+              <h4>Secure</h4><p>Fast and secure, HTTPS protocol and data encryption</p>
+            </div>
+            <div className="feat-col">
+              <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+              <h4>Statistics</h4><p>Check the number of clicks that your URL received</p>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
 
-      {/* Logic Toast Custom sesuai Template Lo */}
+      {/* Toast Notif Sesuai State */}
       <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
         <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
         <span>{toast.msg}</span>
