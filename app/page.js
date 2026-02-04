@@ -83,7 +83,7 @@ export default function Home() {
           </div>
 
           <div className="input-wrapper">
-            {/* STATE INPUT */}
+            {/* --- STATE INPUT --- */}
             {!showResult ? (
               <div id="state-input" className="input-box">
                 <input 
@@ -99,7 +99,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              /* STATE RESULT */
+              /* --- STATE RESULT --- */
               <div id="state-result" className="result-box" style={{ display: 'flex' }}>
                 <span className="material-symbols-rounded" style={{ color: 'var(--accent)' }}>check_circle</span>
                 <span id="finalLink" className="result-text">{hasil}</span>
@@ -113,10 +113,11 @@ export default function Home() {
             )}
           </div>
 
-          {/* AREA RECENT LINKS: Sembunyi kalau kosong */}
+          {/* LOGIKA: Hanya muncul jika ada data di recentLinks */}
           {recentLinks.length > 0 && (
             <div className="recent-section">
               <span className="section-label">Your Recent Links:</span>
+              
               {recentLinks.map((item, index) => (
                 <div key={index} className="link-row">
                   <div className="link-info">
@@ -141,50 +142,38 @@ export default function Home() {
               ))}
             </div>
           )}
+
         </div>
 
-        {/* AREA PREMIUM BOX: Floating & Separate */}
-        <div className="premium-box" style={{ 
-          background: '#fff', padding: '30px', borderRadius: '24px', 
-          margin: '60px auto', maxWidth: '700px', display: 'flex', 
-          justifyContent: 'space-between', alignItems: 'center', gap: '20px',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.1)', border: '1px solid rgba(0,0,0,0.03)' 
-        }}>
+        <div className="premium-box">
           <div className="premium-content">
-            <div className="premium-header" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              <span className="material-symbols-rounded icon-star" style={{color: '#f59e0b'}}>verified</span>
+            <div className="premium-header">
+              <span className="material-symbols-rounded icon-star">verified</span>
               <h3>Want More? Try Premium Features!</h3>
             </div>
-            <p className="premium-desc" style={{ color: '#64748b', fontSize: '0.9rem' }}>
+            <p className="premium-desc">
               Custom short links, powerful dashboard, detailed analytics, API, UTM builder, QR codes, browser extension, app integrations and support.
             </p>
           </div>
-          <button className="btn-black btn-cta" style={{ whiteSpace: 'nowrap' }} onClick={() => window.location.href='/register'}>
+          <button className="btn-black btn-cta" onClick={() => window.location.href='/register'}>
             Start Free
           </button>
         </div>
 
-        {/* AREA ARTIKEL & FEATURE: Balik Utuh 100% */}
         <div className="content-wrapper-bottom">
           <div className="article-white-box">
             <div className="article-inner">
               <div className="article-item">
                 <h3>How URL Shorteners Work</h3>
-                <p>
-                  Our system works as a smart middleman: we securely store your long links and exchange them for short aliases. When the short link is clicked, our servers will redirect the visitor directly to the original destination without any delay.
-                </p>
+                <p>Our system works as a smart middleman: we securely store your long links and exchange them for short aliases. When the short link is clicked, our servers will redirect the visitor directly to the original destination without any delay.</p>
               </div>
               <div className="article-item">
                 <h3>Simple and fast URL shortener!</h3>
-                <p>
-                  ShortPro allows to shorten long links from Instagram, Facebook, YouTube, Twitter, Linked In, WhatsApp, TikTok, blogs and any domain name. Just paste the long URL and click the Shorten URL button. On the next page, copy the shortened URL and share it on sites, chat and emails.
-                </p>
+                <p>ShortPro allows to shorten long links from Instagram, Facebook, YouTube, Twitter, Linked In, WhatsApp, TikTok, blogs and any domain name.</p>
               </div>
               <div className="article-item">
                 <h3>Shorten, share and track</h3>
-                <p>
-                  Your shortened URLs can be used in publications, documents, advertisements, blogs, forums, instant messages, and other locations. Track statistics for your business and projects by monitoring the number of hits from your URL with our click counter.
-                </p>
+                <p>Track statistics for your business and projects by monitoring the number of hits from your URL with our click counter.</p>
               </div>
             </div>
           </div>
@@ -219,7 +208,6 @@ export default function Home() {
       </main>
       <Footer />
 
-      {/* Toast Notification */}
       <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
         <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
         <span>{toast.msg}</span>
