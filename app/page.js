@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { siteConfig } from '../lib/config';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Link from 'next/link';
@@ -38,7 +39,7 @@ export default function Home() {
   };
 
   const processLink = async () => {
-    if (!url.trim()) return showToast("Mohon isi URL!", "error");
+    if (!url.trim()) return showToast("Please fill in the URL!", "error");
     setLoading(true);
     const slug = Math.random().toString(36).substring(2, 8);
     const fullLink = `${window.location.origin}/${slug}`;
@@ -52,9 +53,9 @@ export default function Home() {
       setRecentLinks(updated);
       setNativeCookie('recent_links', JSON.stringify(updated), 7);
       setUrl('');
-      showToast("Link berhasil diperpendek!");
+      showToast("Link successfully shortened!");
     } else {
-      showToast("Gagal menyimpan ke database!", "error");
+      showToast("Failed to save to database!", "error");
     }
     setLoading(false);
   };
@@ -63,13 +64,13 @@ export default function Home() {
     const updated = recentLinks.filter((_, i) => i !== index);
     setRecentLinks(updated);
     setNativeCookie('recent_links', JSON.stringify(updated), 7);
-    showToast("Riwayat dihapus");
+    showToast("History deleted");
   };
 
   const clearAll = () => {
     document.cookie = "recent_links=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setRecentLinks([]);
-    showToast("Semua riwayat dibersihkan");
+    showToast("All history cleared");
   };
 
   const copyResult = (text) => {
@@ -89,8 +90,8 @@ export default function Home() {
         <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             
             <div className="hero-text">
-                <h1>Shorten URLs,<br/>Expand Reach.</h1>
-                <p className="subtitle">Aplikasi pemendek tautan profesional. Masukkan link panjang di bawah.</p>
+                <h1>Paste the URL to be shortened.</h1>
+                <p className="subtitle">The modern link shortener for marketers. Shorten URLs, track clicks, and share beautiful analytics reports with your clients</p>
             </div>
 
             <div className="input-wrapper">
@@ -101,7 +102,7 @@ export default function Home() {
                         id="urlInput"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        placeholder="Tempel URL panjang di sini..." 
+                        placeholder="Paste long URL here..." 
                         required 
                       />
                       <button className="btn-black" onClick={processLink} disabled={loading}>
@@ -179,7 +180,7 @@ export default function Home() {
                         </div>
                         <div className="article-item">
                             <h3>Simple and fast URL shortener!</h3>
-                            <p>ShortPro allows to shorten long links from Instagram, Facebook, YouTube, Twitter, Linked In, WhatsApp, TikTok, blogs and any domain name. Just paste the long URL and click the Shorten URL button. On the next page, copy the shortened URL and share it on sites, chat and emails.</p>
+                            <p>{siteConfig.name} allows to shorten long links from Instagram, Facebook, YouTube, Twitter, Linked In, WhatsApp, TikTok, blogs and any domain name. Just paste the long URL and click the Shorten URL button. On the next page, copy the shortened URL and share it on sites, chat and emails.</p>
                         </div>
                         <div className="article-item">
                             <h3>Shorten, share and track</h3>
@@ -191,11 +192,11 @@ export default function Home() {
                 <div className="feature-grid-fixed">
                     <div className="feat-col">
                         <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
-                        <h4>Easy</h4><p>ShortURL is easy and fast, enter long link to get short link</p>
+                        <h4>Easy</h4><p>{siteConfig.name} is easy and fast, enter long link to get short link</p>
                     </div>
                     <div className="feat-col">
                         <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div>
-                        <h4>Shortened</h4><p>Use any link, no matter what size, ShortURL always shortens</p>
+                        <h4>Shortened</h4><p>Use any link, no matter what size, {siteConfig.name} always shortens</p>
                     </div>
                     <div className="feat-col">
                         <div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
