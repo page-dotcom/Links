@@ -24,7 +24,7 @@ export const metadata = {
     description: 'Shorten URLs and track real-time analytics with ease.',
     images: [
       {
-        url: '/og-image.jpg', // Pastikan lo taruh file og-image.jpg di folder public
+        url: 'https://i.ibb.co.com/bj8MRG2B/blog2-F63f7bfe24890332fa0e7bc492-Fimgac144d-e0eb-bdf4-4810-38bbad0b28d.png', // Pastikan lo taruh file og-image.jpg di folder public
         width: 1200,
         height: 630,
         alt: `${siteConfig.name} Analytics`,
@@ -37,7 +37,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: siteConfig.name,
     description: 'Professional link shortener with real-time tracking.',
-    images: ['/og-image.jpg'],
+    images: ['https://i.ibb.co.com/bj8MRG2B/blog2-F63f7bfe24890332fa0e7bc492-Fimgac144d-e0eb-bdf4-4810-38bbad0b28d.png'],
   },
 
   // Icon & Favicon
