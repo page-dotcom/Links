@@ -13,6 +13,7 @@ export default function Home() {
   const [showResult, setShowResult] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
 
+  // Load history dari localStorage biar gak ilang pas refresh
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('recentLinks') || '[]');
     setRecentLinks(saved);
@@ -58,9 +59,9 @@ export default function Home() {
     fetch(qrUrl).then(res => res.blob()).then(blob => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `QR-${slug}.png`;
+      a.download = `QR-ShortPro-${slug}.png`;
       a.click();
-      triggerToast("QR Berhasil diunduh!", "success");
+      triggerToast("QR Code diunduh!", "success");
     });
   };
 
@@ -76,6 +77,7 @@ export default function Home() {
           </div>
 
           <div className="input-wrapper">
+            {/* --- STATE INPUT --- */}
             {!showResult ? (
               <div id="state-input" className="input-box">
                 <input 
@@ -91,6 +93,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
+              /* --- STATE RESULT --- */
               <div id="state-result" className="result-box" style={{ display: 'flex' }}>
                 <span className="material-symbols-rounded" style={{ color: 'var(--accent)' }}>check_circle</span>
                 <span id="finalLink" className="result-text">{hasil}</span>
@@ -104,10 +107,11 @@ export default function Home() {
             )}
           </div>
 
-          {/* LOGIKA: Hanya muncul jika ada recentLinks */}
+          {/* LOGIKA: Hanya muncul jika ada data di recentLinks */}
           {recentLinks.length > 0 && (
             <div className="recent-section">
               <span className="section-label">Your Recent Links:</span>
+              
               {recentLinks.map((item, index) => (
                 <div key={index} className="link-row">
                   <div className="link-info">
@@ -134,7 +138,7 @@ export default function Home() {
           )}
 
         </div>
-        
+
         <div className="premium-box">
           <div className="premium-content">
             <div className="premium-header">
@@ -198,7 +202,7 @@ export default function Home() {
       </main>
       <Footer />
 
-      {/* Toast Notification */}
+      {/* Toast Notification Sesuai Template Lo */}
       <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
         <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
         <span>{toast.msg}</span>
