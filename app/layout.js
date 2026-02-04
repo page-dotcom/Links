@@ -1,4 +1,5 @@
-import './globals.css'; // Pastikan CSS Custom lo ada di sini
+import './globals.css';
+import Script from 'next/script';
 
 export default function RootLayout({ children }) {
   return (
@@ -6,6 +7,12 @@ export default function RootLayout({ children }) {
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+        
+        {/* Library QR Code Lokal - Biar gak pake API Sampah */}
+        <Script 
+          src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+          strategy="beforeInteractive"
+        />
       </head>
       <body style={{ margin: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {children}
