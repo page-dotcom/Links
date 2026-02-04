@@ -3,103 +3,96 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { siteConfig } from '../../lib/config';
 
+// Metadata untuk SEO (Penting buat Google)
+export const metadata = {
+  title: `Privacy Policy - ${siteConfig.name}`,
+  description: `Read the privacy policy for ${siteConfig.name} (${siteConfig.domain}). Learn how we protect your data and privacy.`,
+};
+
 export default function PrivacyPolicy() {
+  const lastUpdated = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
   return (
     <>
       <Header />
       <main>
-        <div className="container" style={{ padding: '80px 20px', maxWidth: '900px', margin: '0 auto' }}>
+        <div className="container" style={{ padding: '80px 24px', maxWidth: '800px', margin: '0 auto' }}>
           
-          <div className="article-item" style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '20px' }}>Privacy Policy</h1>
-            <p style={{ color: '#64748b' }}>Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+          {/* Judul Utama */}
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '16px', letterSpacing: '-1px' }}>
+              Privacy Policy
+            </h1>
+            <p style={{ color: '#64748b', fontSize: '1.1rem' }}>
+              Last Updated on {lastUpdated}
+            </p>
           </div>
 
-          <div className="article-item" style={{ textAlign: 'justify', lineHeight: '1.8', color: '#334155' }}>
-            <section style={{ marginBottom: '40px' }}>
-              <h2>1. Introduction</h2>
-              <p>
-                Welcome to <strong>{siteConfig.name}</strong>. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice, or our practices with regards to your personal information, please contact us at support@{siteConfig.domain}.
-              </p>
-              <p>
-                When you visit our website <strong>{siteConfig.domain}</strong> (the "Website"), and more generally, use any of our services (the "Services", which include the Website), we appreciate that you are trusting us with your personal information. We take your privacy very seriously. In this privacy notice, we seek to explain to you in the clearest way possible what information we collect, how we use it and what rights you have in relation to it.
-              </p>
-            </section>
+          <div style={{ lineHeight: '1.8', color: '#334155', fontSize: '1.05rem' }}>
+            
+            {/* Section 1 */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
+              1. Overview and Commitment
+            </h2>
+            <p style={{ marginBottom: '24px' }}>
+              At <strong>{siteConfig.name}</strong>, accessible via <strong>{siteConfig.domain}</strong>, the privacy of our visitors is one of our main priorities. This Privacy Policy document contains types of information that is collected and recorded by our platform and how we use it to provide a secure URL shortening service.
+            </p>
+            <p style={{ marginBottom: '24px' }}>
+              By using our website, you hereby consent to our Privacy Policy and agree to its terms. If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact our team through the official support channels provided on our domain.
+            </p>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2>2. Information We Collect</h2>
-              <p>
-                As a URL shortening service, <strong>{siteConfig.name}</strong> collects limited information to provide and improve our services. This includes:
-              </p>
-              <ul>
-                <li><strong>Personal Information:</strong> If you create an account, we collect your email address and name.</li>
-                <li><strong>URL Data:</strong> We collect and store the original long URLs you submit and the generated short URLs.</li>
-                <li><strong>Log and Usage Data:</strong> Our servers automatically collect information when you access or use our Website, such as your IP address, browser type, and the pages you view.</li>
-                <li><strong>Device Data:</strong> We collect information about the device you use to access the Services, such as device model and operating system.</li>
-              </ul>
-            </section>
+            {/* Section 2 */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
+              2. Data Collection and Usage
+            </h2>
+            <p style={{ marginBottom: '24px' }}>
+              We collect limited data essential for the operation of <strong>{siteConfig.name}</strong>. This primarily includes the original long URLs you provide and the generated short links. When you interact with our services, we may also log standard information such as your IP address, browser type, and the time of access to monitor for abuse and ensure service stability.
+            </p>
+            <p style={{ marginBottom: '24px' }}>
+              The information we collect is utilized to facilitate the redirection process, maintain the security of our infrastructure, and generate anonymous analytics for users. We do not sell or rent your personal data to third parties for marketing purposes.
+            </p>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2>3. How We Use Your Information</h2>
-              <p>
-                We use personal information collected via our Website for a variety of business purposes described below:
-              </p>
-              <ul>
-                <li><strong>To facilitate account creation and logon process.</strong></li>
-                <li><strong>To redirect users</strong> who click on a shortened link to the original destination URL.</li>
-                <li><strong>To generate analytics</strong> regarding the usage of short links (e.g., number of clicks, geographic location of visitors).</li>
-                <li><strong>To protect our Services</strong> and prevent spam, abuse, or illegal activities on <strong>{siteConfig.domain}</strong>.</li>
-                <li><strong>To respond to legal requests</strong> and prevent harm.</li>
-              </ul>
-            </section>
+            {/* Section 3 */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
+              3. Cookie Policy and Storage
+            </h2>
+            <p style={{ marginBottom: '24px' }}>
+              <strong>{siteConfig.name}</strong> uses cookies to enhance your experience. Specifically, we store your recent link history in a local cookie within your browser for a period of seven days. This allows you to manage your links without needing a registered account. These cookies are not used for cross-site tracking or targeted profiling.
+            </p>
+            <p style={{ marginBottom: '24px' }}>
+              You can choose to disable cookies through your individual browser options. However, please note that disabling cookies may affect your ability to view your recent link history on our platform.
+            </p>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2>4. Cookies and Tracking Technologies</h2>
-              <p>
-                We may use cookies and similar tracking technologies (like web beacons and pixels) to access or store information. Specific information about how we use such technologies and how you can refuse certain cookies is set out in our Cookie Policy. 
-              </p>
-              <p>
-                At <strong>{siteConfig.name}</strong>, we use cookies to store your recent link history for your convenience. These cookies are stored locally in your browser and are not used for targeted advertising purposes without your explicit consent.
-              </p>
-            </section>
+            {/* Section 4 */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
+              4. Advertising and Google AdSense
+            </h2>
+            <p style={{ marginBottom: '24px' }}>
+              We may partner with third-party vendors, including Google, which use cookies to serve ads based on a user's prior visits to <strong>{siteConfig.domain}</strong> or other websites. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our sites and other sites on the Internet.
+            </p>
+            <p style={{ marginBottom: '24px' }}>
+              Users may opt out of personalized advertising by visiting Google's Ads Settings. Alternatively, you can opt out of a third-party vendor's use of cookies for personalized advertising by visiting the Network Advertising Initiative opt-out page.
+            </p>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2>5. Google AdSense and Third-Party Advertising</h2>
-              <p>
-                We may use third-party advertising companies to serve ads when you visit the Website. These companies may use information about your visits to this and other websites that are contained in web cookies in order to provide advertisements about goods and services of interest to you.
-              </p>
-              <p>
-                Google, as a third-party vendor, uses cookies to serve ads on <strong>{siteConfig.domain}</strong>. Google's use of the DART cookie enables it to serve ads to our users based on their visit to our sites and other sites on the Internet. Users may opt out of the use of the DART cookie by visiting the Google ad and content network privacy policy.
-              </p>
-            </section>
+            {/* Section 5 */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
+              5. Legal Obligations and Security
+            </h2>
+            <p style={{ marginBottom: '24px' }}>
+              We will disclose any information we collect, use or receive if required or permitted by law, such as to comply with a subpoena or similar legal process, and when we believe in good faith that disclosure is necessary to protect our rights, protect your safety or the safety of others, investigate fraud, or respond to a government request.
+            </p>
+            <p style={{ marginBottom: '24px' }}>
+              We employ industry-standard security measures to safeguard your data. While we strive to use commercially acceptable means to protect your personal information, we cannot guarantee its absolute security, as no method of transmission over the Internet is 100% secure.
+            </p>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2>6. Data Security</h2>
-              <p>
-                We have implemented appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, despite our safeguards and efforts to secure your information, no electronic transmission over the Internet or information storage technology can be guaranteed to be 100% secure.
-              </p>
-            </section>
+            {/* Section 6 */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
+              6. Contact Information
+            </h2>
+            <p style={{ marginBottom: '24px' }}>
+              If you have any questions about this Privacy Policy, please contact us via email at <strong>support@{siteConfig.domain}</strong>. We aim to respond to all inquiries regarding data privacy and security within a reasonable timeframe.
+            </p>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2>7. Your Privacy Rights</h2>
-              <p>
-                In some regions (like the European Economic Area), you have certain rights under applicable data protection laws. These may include the right (i) to request access and obtain a copy of your personal information, (ii) to request rectification or erasure; (iii) to restrict the processing of your personal information; and (iv) if applicable, to data portability.
-              </p>
-            </section>
-
-            <section style={{ marginBottom: '40px' }}>
-              <h2>8. Changes to This Policy</h2>
-              <p>
-                We may update this privacy notice from time to time. The updated version will be indicated by an updated "Revised" date and the updated version will be effective as soon as it is accessible. We encourage you to review this privacy notice frequently to be informed of how we are protecting your information.
-              </p>
-            </section>
-
-            <section style={{ marginBottom: '40px' }}>
-              <h2>9. Contact Us</h2>
-              <p>
-                If you have questions or comments about this notice, you may email us at <strong>privacy@{siteConfig.domain}</strong> or by post to the address provided in our contact information.
-              </p>
-            </section>
           </div>
         </div>
       </main>
