@@ -26,7 +26,7 @@ export default function Footer() {
           <div className="footer-right">
             <div className="footer-links">
               <Link href="/">Home</Link>
-              <Link href="#">URL Click Counter</Link>
+              <Link href="/stats">URL Click Counter</Link>
               <Link href="#">Privacy</Link>
               <Link href="#">Terms</Link>
               <Link href="#">Contact</Link>
