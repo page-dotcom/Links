@@ -1,6 +1,6 @@
 import './globals.css';
 import Script from 'next/script';
-import { siteConfig } from './lib/config';
+import { siteConfig } from '../lib/config';
 
 // 1. Metadata API - Ini cara Next.js 14 handle SEO paling maksimal
 export const metadata = {
