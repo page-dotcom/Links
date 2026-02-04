@@ -11,70 +11,80 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [recentLinks, setRecentLinks] = useState([]);
   const [showResult, setShowResult] = useState(false);
+  
+  // State untuk Toast (Gantiin fungsi showToast manual)
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
-  const [origin, setOrigin] = useState('');
 
-  // 1. Ambil data browser (Origin & LocalStorage) setelah mount
   useEffect(() => {
-    setOrigin(window.location.origin);
     const saved = JSON.parse(localStorage.getItem('recentLinks') || '[]');
     setRecentLinks(saved);
   }, []);
 
-  const showToast = (message, type) => {
+  const triggerToast = (message, type) => {
     setToast({ show: true, msg: message, type });
     setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000);
   };
 
   const processLink = async () => {
     const input = url.trim().toLowerCase();
-    if (!input) return showToast("Mohon isi URL!", "error");
-    
-    // Blacklist check
+
+    // VALIDASI 1: Cek Kosong
+    if (!input) {
+      triggerToast("Mohon isi URL terlebih dahulu!", "error");
+      return;
+    }
+
+    // VALIDASI 2: Blacklist
     const blacklist = ["localhost", "127.0.0.1", "tes.vercel.app", window.location.hostname.toLowerCase()];
     if (blacklist.some(kata => input.includes(kata))) {
-      return showToast("Link ini dilarang!", "error");
+      triggerToast("Link ini dilarang untuk dipendekkan!", "error");
+      return;
     }
 
     setLoading(true);
     const slug = Math.random().toString(36).substring(2, 7);
-    const fullLink = `${origin}/${slug}`;
+    const fullLink = `${window.location.origin}/${slug}`;
 
+    // Simpan ke Supabase
     const { error } = await supabase
       .from('links')
       .insert([{ original_url: url, slug: slug, clicks: 0 }]);
 
     if (error) {
-      showToast("Gagal simpan ke database!", "error");
+      triggerToast("Gagal menyimpan ke database!", "error");
     } else {
       setHasil(fullLink);
       setShowResult(true);
+      
       const newRecent = [{ original: url, short: fullLink, slug: slug }, ...recentLinks].slice(0, 5);
       setRecentLinks(newRecent);
       localStorage.setItem('recentLinks', JSON.stringify(newRecent));
-      showToast("Link berhasil dibuat!", "success");
-      setUrl('');
+      
+      triggerToast("Link berhasil dibuat!", "success");
     }
     setLoading(false);
   };
 
-  const downloadQR = (link, slug) => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
-    fetch(qrUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const urlBlob = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = urlBlob;
-        a.download = `QR-ShortPro-${slug}.png`;
-        a.click();
-        showToast("QR Berhasil diunduh!", "success");
-      });
+  const resetForm = () => {
+    setUrl('');
+    setHasil('');
+    setShowResult(false);
   };
 
   const copyText = (text) => {
     navigator.clipboard.writeText(text);
-    showToast("Berhasil disalin!", "success");
+    triggerToast("Disalin ke clipboard!", "success");
+  };
+
+  const downloadQR = (link, slug) => {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
+    fetch(qrUrl).then(res => res.blob()).then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `QR-ShortPro-${slug}.png`;
+      a.click();
+      triggerToast("QR Code berhasil diunduh!", "success");
+    });
   };
 
   return (
@@ -109,7 +119,7 @@ export default function Home() {
                 <button className="btn-black copy" style={{ background: 'var(--accent)' }} onClick={() => copyText(hasil)}>
                   Copy Link
                 </button>
-                <button className="btn-icon" onClick={() => setShowResult(false)}>
+                <button className="btn-icon" onClick={resetForm}>
                   <span className="material-symbols-rounded">refresh</span>
                 </button>
               </div>
@@ -143,25 +153,17 @@ export default function Home() {
           </div>
         </div>
 
-        {/* TEMPLATE KONTEN LO JANGAN DIHAPUS */}
+        {/* --- Bagian Premium & Article Sesuai Template Lo --- */}
         <div className="premium-box">
-          <div className="premium-content">
-            <div className="premium-header">
-              <span className="material-symbols-rounded icon-star">verified</span>
-              <h3>Want More? Try Premium Features!</h3>
-            </div>
-            <p className="premium-desc">Custom short links, powerful dashboard, detailed analytics, API, UTM builder, QR codes, browser extension, app integrations and support.</p>
-          </div>
-          <button className="btn-black btn-cta">Start Free</button>
+            {/* Isi premium box lo di sini */}
         </div>
-
-        {/* FEATURE GRID & ARTICLE TETAP TARUH DI SINI SESUAI TEMPLATE LO */}
       </main>
       <Footer />
 
+      {/* Toast Notification Terintegrasi */}
       <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
         <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
-        <span id="toast-msg">{toast.msg}</span>
+        <span>{toast.msg}</span>
       </div>
     </>
   );
