@@ -10,14 +10,15 @@ export default async function RedirectPage({ params, searchParams }) {
   const { code } = params;
   const isConfirmAction = searchParams.a === 'confirm';
   
+  // Ambil cookie server untuk cek skip
   const cookieStore = cookies();
   const hasConfirmed = cookieStore.get(`skip_${code}`);
 
-  // 1. Ambil data link
+  // 1. Ambil data dari database
   const { data } = await supabase.from('links').select('*').eq('slug', code).single();
   if (!data) notFound();
 
-  // 2. Logic: Jika sudah lewat proses konfirmasi atau ada cookie, LANGSUNG GAS
+  // 2. Jika sudah konfirmasi atau ada cookie, langsung alihkan
   if (isConfirmAction || hasConfirmed) {
     await supabase.rpc('increment_clicks', { row_id: data.id });
     redirect(data.original_url);
@@ -26,81 +27,81 @@ export default async function RedirectPage({ params, searchParams }) {
   return (
     <>
       <Header />
-      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ 
           width: '100%', 
-          maxWidth: '550px', 
-          textAlign: 'center',
+          maxWidth: '500px', 
           background: '#fff',
-          padding: '50px 40px',
-          borderRadius: '8px', 
-          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-          border: '1px solid #edf2f7'
+          padding: '40px',
+          borderRadius: '8px', // Box profesional (tidak terlalu bulat)
+          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
+          border: '1px solid #e2e8f0',
+          textAlign: 'center'
         }}>
-          <div style={{ marginBottom: '24px' }}>
-            <span className="material-symbols-rounded" style={{ fontSize: '40px', color: 'var(--accent)' }}>
-              verified_user
+          
+          <div style={{ marginBottom: '20px' }}>
+            <span className="material-symbols-rounded" style={{ fontSize: '48px', color: '#3b82f6' }}>
+              security
             </span>
           </div>
 
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '16px', color: '#1a202c' }}>
-            Security Verification
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '12px', color: '#0f172a' }}>
+            External Link Warning
           </h1>
           
-          <p style={{ color: '#718096', fontSize: '1rem', lineHeight: '1.6', marginBottom: '32px' }}>
-            You are about to be redirected. Please confirm that you want to proceed to the destination below.
+          <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '32px' }}>
+            You are leaving this site to an external URL. Please verify the destination before proceeding.
           </p>
 
           <div style={{ 
-            background: '#f7fafc', 
-            padding: '20px', 
-            borderRadius: '6px', 
+            background: '#f8fafc', 
+            padding: '16px', 
+            borderRadius: '4px', 
             fontSize: '0.9rem', 
-            color: '#2d3748',
+            color: '#334155',
             wordBreak: 'break-all',
-            marginBottom: '40px',
+            marginBottom: '32px',
             fontFamily: 'monospace',
-            border: '1px solid #e2e8f0',
-            textAlign: 'left'
+            textAlign: 'left',
+            borderLeft: '4px solid #3b82f6'
           }}>
-            <span style={{ color: '#a0aec0', display: 'block', fontSize: '0.75rem', marginBottom: '4px', fontWeight: '700', textTransform: 'uppercase' }}>Redirecting to:</span>
+            <span style={{ display: 'block', fontSize: '10px', color: '#94a3b8', marginBottom: '4px', fontWeight: 'bold' }}>DESTINATION:</span>
             {data.original_url}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <a 
               href={`/${code}?a=confirm`}
-              onClick={() => {
-                document.cookie = `skip_${code}=true; max-age=600; path=/`;
-              }}
+              id="confirmLink"
               style={{ 
                 background: '#0f172a', 
                 color: '#fff', 
-                padding: '18px', 
+                padding: '16px', 
                 borderRadius: '6px', 
                 textDecoration: 'none', 
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px'
+                fontWeight: '700'
               }}
             >
               Continue to Link
-              <span className="material-symbols-rounded">arrow_right_alt</span>
             </a>
-            <a href="/" style={{ color: '#a0aec0', textDecoration: 'none', fontSize: '0.9rem' }}>Cancel</a>
+            <a href="/" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.85rem' }}>Cancel</a>
           </div>
         </div>
 
-        {/* SCRIPT OTOMATIS GANTI URL DI BROWSER */}
+        {/* Script untuk Otomatisasi URL & Cookies */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
+            // A. OTOMATIS TAMBAH ?a=confirm DI URL
             const url = new URL(window.location);
             if (!url.searchParams.has('a')) {
               url.searchParams.set('a', 'confirm');
-              window.history.replaceState({}, '', url);
+              window.history.replaceState({}, '', url.toString());
             }
+
+            // B. PASANG COOKIE SAAT KLIK
+            document.getElementById('confirmLink').addEventListener('click', function() {
+              document.cookie = "skip_${code}=true; max-age=600; path=/";
+            });
           })();
         `}} />
       </main>
