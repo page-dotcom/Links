@@ -27,9 +27,9 @@ export default function Footer() {
             <div className="footer-links">
               <Link href="/">Home</Link>
               <Link href="/stats">URL Click Counter</Link>
-              <Link href="#">Privacy</Link>
-              <Link href="#">Terms</Link>
-              <Link href="#">Contact</Link>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
+              <Link href="/contact">Contact</Link>
             </div>
 
             <div className="social-row">
