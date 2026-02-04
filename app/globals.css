@@ -1,0 +1,946 @@
+/* --- 1. RESET & VARIABLES --- */
+        :root {
+            --primary: #0f172a;       /* Hitam Slate (Warna Utama) */
+            --accent: #2563eb;        /* Biru Aksen */
+            --danger: #ef4444;        /* Merah Error */
+            --success: #10b981;       /* Hijau Sukses */
+            
+            --bg-grid-color: #e2e8f0; /* Warna Garis Grid */
+            --bg-body: #f8fafc;       /* Warna Dasar Body */
+            --bg-surface: #ffffff;    /* Warna Header/Footer/Card */
+            
+            --border: #cbd5e1;
+            --radius: 6px;
+            --max-w: 850px;           /* Lebar Konten Ideal */
+        }
+
+html {
+        scroll-behavior: smooth; /* Efek scroll halus native (ringan) */
+    }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; font-family: 'Open Sans', sans-serif;}
+
+        body {
+            color: var(--primary);
+            background-color: var(--bg-body);
+            
+            /* --- BACKGROUND KOTAK-KOTAK (GRID) --- */
+            background-image: 
+                linear-gradient(var(--bg-grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid-color) 1px, transparent 1px);
+            background-size: 30px 30px; /* Ukuran kotak */
+            
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Container Pengunci Lebar */
+        .container {
+            width: 100%;
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* --- 2. HEADER (PUTIH SOLID) --- */
+        header {
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            height: 72px;
+            display: flex;
+            align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .brand {
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 800; font-size: 1.35rem;
+            color: var(--primary); text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .brand span { color: var(--accent); font-size: 28px; }
+
+        /* --- 3. MAIN CONTENT --- */
+        main {
+            flex: 1;
+            padding: 60px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-text {
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 48px;
+            /* Agar teks terbaca jelas di atas grid, kita kasih background bayangan tipis atau biarkan transparan jika kontras cukup */
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: var(--bg-body); /* Sedikit hack agar teks tidak bertabrakan garis */
+            display: inline-block;
+            padding: 0 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        /* --- 4. INPUT SYSTEM (UNIFIED BOX) --- */
+        .input-wrapper {
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 60px;
+        }
+
+        /* Box Input Menyatu */
+        .input-box {
+            background: var(--bg-surface);
+            border: 2px solid var(--primary); /* Border Tebal Hitam */
+            border-radius: var(--radius);
+            padding: 6px;
+            display: flex;
+            box-shadow: 4px 4px 0 rgba(15, 23, 42, 0.1); /* Shadow Retro Solid */
+            transition: transform 0.1s;
+        }
+
+        .input-box input {
+            flex: 1;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1.05rem;
+            font-family: inherit;
+            color: var(--primary);
+        }
+
+        .btn-black {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0 28px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            white-space: nowrap;
+        }
+        .btn-black:hover { opacity: 0.9; }
+
+        /* RESULT STATE (Hidden) */
+        .result-box {
+            display: none; /* Default Hidden */
+            background: #f0f9ff; /* Biru muda sekali */
+            border: 2px dashed var(--accent);
+            border-radius: var(--radius);
+            padding: 12px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-text {
+            flex: 1;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent);
+            padding-left: 10px;
+        }
+
+        /* --- 5. RECENT LINKS (LIST) --- */
+        .recent-section {
+            width: 100%;
+            border-top: 1px solid var(--border);
+            padding-top: 30px;
+            background: rgba(255,255,255,0.8); /* Sedikit transparan biar grid samar */
+            backdrop-filter: blur(5px);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .section-label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: #64748b; margin-bottom: 16px; display: block;
+        }
+
+        .link-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 0; border-bottom: 1px solid var(--border);
+        }
+        .link-row:last-child { border-bottom: none; }
+
+        .link-info { display: flex; flex-direction: column; gap: 4px; overflow: hidden; margin-right: 16px; }
+        .short { font-weight: 700; color: var(--primary); text-decoration: none; font-size: 1rem; }
+        .long { font-size: 0.85rem; color: #64748b; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .actions { display: flex; gap: 6px; }
+        
+        .btn-icon {
+            width: 36px; height: 36px;
+            border: 1px solid var(--border); background: #fff; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #64748b; transition: all 0.2s;
+        }
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); background: #f1f5f9; }
+        .btn-icon span { font-size: 20px; }
+
+        /* --- 6. FOOTER (PUTIH SOLID + LINKS) --- */
+        footer {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            padding: 30px 0;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright { font-size: 0.9rem; color: #64748b; }
+        
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a {
+            text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 500;
+        }
+        .footer-links a:hover { color: var(--primary); }
+
+        /* --- 7. TOAST NOTIFICATION (PENGGANTI ALERT) --- */
+        .toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: var(--primary); /* Default Hitam */
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 14px 20px;
+            position: fixed; z-index: 100;
+            left: 50%; bottom: 30px; transform: translateX(-50%);
+            font-size: 0.95rem; font-weight: 500;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            opacity: 0; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        .toast.error { background-color: var(--danger); } /* Merah kalau Error */
+        .toast.success { background-color: var(--success); } /* Hijau kalau Sukses */
+
+        /* --- 8. RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            
+            /* Footer Stack */
+            .footer-content { flex-direction: column; gap: 16px; }
+            
+            /* Input Stack */
+            .input-box {
+                flex-direction: column;
+                background: transparent; border: none; padding: 0; box-shadow: none;
+            }
+            .input-box input {
+                background: #fff; border: 2px solid var(--primary);
+                border-radius: var(--radius); margin-bottom: 12px; text-align: center;
+            }
+            .btn-black { width: 100%; justify-content: center; padding: 14px; }
+
+            /* Result Stack */
+            .result-box { flex-direction: column; text-align: center; }
+            .btn-black.copy { width: 100%; justify-content: center; }
+
+            /* Recent Link Stack */
+            .link-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .link-info { width: 100%; margin: 0; }
+            .long { max-width: 100%; }
+            
+            .actions { 
+                width: 100%; justify-content: space-between; 
+                padding-top: 10px; border-top: 1px dashed var(--border); 
+            }
+            .btn-icon { flex: 1; height: 40px; } /* Tombol lebar di HP */
+        }
+        
+        /* --- PREMIUM BOX SECTION --- */
+.premium-box {
+    width: 100%;
+    max-width: 850px; /* Samakan dengan lebar container utama */
+    margin-top: 40px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 30px;
+    display: flex;
+    align-items: center; /* Vertikal tengah */
+    justify-content: space-between; /* Teks kiri, tombol kanan */
+    gap: 30px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); /* Shadow sangat tipis */
+}
+
+.premium-content {
+    flex: 1; /* Ambil sisa ruang */
+}
+
+.premium-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.premium-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.icon-star {
+    color: #eab308; /* Warna Emas/Kuning Premium */
+    font-size: 24px;
+}
+
+.premium-desc {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.btn-cta {
+    padding: 14px 32px; /* Tombol sedikit lebih besar */
+    font-size: 1rem;
+    white-space: nowrap; /* Teks jangan turun baris */
+}
+
+/* RESPONSIVE (HP) */
+@media (max-width: 768px) {
+    .premium-box {
+        flex-direction: column; /* Tumpuk ke bawah */
+        align-items: flex-start;
+        text-align: left;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .premium-header {
+        margin-bottom: 12px;
+    }
+
+    .btn-cta {
+        width: 100%; /* Tombol full width di HP */
+        justify-content: center;
+        margin-top: 10px;
+    }
+}
+
+/* --- FEATURES / ARTICLES SECTION --- */
+/* --- WRAPPER BAWAH --- */
+.content-wrapper-bottom {
+    width: 100%;
+    max-width: 850px;
+    margin-top: 50px;
+}
+
+/* --- 1. ARTICLE WHITE BOX (KOTAK PUTIH FULL) --- */
+.article-white-box {
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    /* Hapus border kiri-kanan dan radius agar terlihat 'rata' seperti section */
+    border-left: none;
+    border-right: none;
+    border-radius: 0; 
+    
+    padding: 40px;
+    margin-bottom: 50px;
+    
+    /* Trik agar box melebar keluar dari Container parent-nya */
+    width: 100vw; /* Lebar selebar layar */
+    margin-left: calc(-50vw + 50%); /* Geser ke kiri mentok */
+    position: relative;
+    left: 0;
+}
+
+/* Agar isi teks tetap rapi di tengah (tidak mepet pinggir layar) */
+.article-inner {
+    max-width: 850px; /* Samakan dengan lebar konten utama */
+    margin: 0 auto;   /* Tengah */
+    padding: 0 24px;  /* Jarak aman teks dari pinggir */
+}
+
+.article-item {
+    margin-bottom: 30px;
+}
+.article-item:last-child { margin-bottom: 0; }
+
+.article-item h3 {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.article-item p {
+    font-size: 1rem;
+    color: #475569;
+    line-height: 1.7;
+}
+
+.article-item p a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+.article-item p a:hover { text-decoration: underline; }
+
+
+/* --- 2. FEATURE GRID (TETAP 3 KOLOM DI SEMUA UKURAN) --- */
+.feature-grid-fixed {
+    display: grid;
+    /* Grid 3 Kolom KONSISTEN Desktop & HP */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px;
+    text-align: center;
+    padding-bottom: 40px;
+    
+    /* Agar grid tidak terlalu lebar di HP */
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.feat-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-wrap {
+    width: 48px;
+    height: 48px;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+.icon-wrap svg { width: 100%; height: 100%; stroke-width: 1.5px; }
+
+.feat-col h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--primary);
+}
+
+.feat-col p {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* --- RESPONSIVE MOBILE (HP) --- */
+@media (max-width: 768px) {
+    /* Artikel Box di HP */
+    .article-white-box {
+        padding: 30px 0; /* Padding atas bawah saja */
+    }
+    
+    .article-item h3 { font-size: 1.3rem; }
+
+    /* Grid Fitur di HP: Tetap 3 kolom tapi dikecilkan */
+    .feature-grid-fixed {
+        gap: 8px; /* Jarak dirapatkan */
+    }
+
+    .icon-wrap {
+        width: 32px;
+        height: 32px; /* Icon kecil */
+        margin-bottom: 8px;
+    }
+
+    .feat-col h4 {
+        font-size: 0.8rem; /* Judul kecil */
+    }
+
+    .feat-col p {
+        font-size: 0.65rem; /* Teks deskripsi kecil */
+        line-height: 1.2;
+    }
+}
+
+/* --- FEATURE GRID (DIPERBESAR) --- */
+.feature-grid-fixed {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    
+    /* PERBAIKAN: Jarak antar kolom diperlebar */
+    gap: 40px; 
+    
+    text-align: center;
+    padding-bottom: 60px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.feat-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* PERBAIKAN: Ukuran Ikon Diperbesar */
+.icon-wrap {
+    width: 64px;  /* Sebelumnya 48px -> Sekarang 64px */
+    height: 64px;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+.icon-wrap svg { 
+    width: 100%; 
+    height: 100%; 
+    stroke-width: 1.5px; 
+}
+
+/* PERBAIKAN: Ukuran Judul & Teks Diperbesar */
+.feat-col h4 {
+    font-size: 1.25rem; /* Lebih besar */
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--primary);
+}
+
+.feat-col p {
+    font-size: 1rem; /* Lebih besar & terbaca */
+    color: #64748b;
+    line-height: 1.6;
+    max-width: 280px; /* Batasi lebar teks agar rapi */
+}
+
+/* RESPONSIVE (HP) - Skala ulang agar muat 3 kolom */
+@media (max-width: 768px) {
+    .feature-grid-fixed {
+        gap: 12px; /* Rapatkan di HP */
+    }
+
+    .icon-wrap {
+        width: 36px; /* Ikon dikecilkan pas untuk HP */
+        height: 36px;
+        margin-bottom: 8px;
+    }
+
+    .feat-col h4 {
+        font-size: 0.85rem;
+    }
+
+    .feat-col p {
+        font-size: 0.7rem;
+        line-height: 1.3;
+    }
+}
+
+/* --- 5. RECENT LINKS (RAPID & COLOR MATCH) --- */
+.recent-section {
+    width: 100%;
+    border-top: 1px solid var(--border);
+    padding-top: 30px;
+    margin-top: 40px;
+}
+
+.section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 16px;
+    display: block;
+    padding-left: 4px; /* Sedikit geser biar lurus sama box */
+}
+
+/* Box per Item */
+.link-row {
+    background: #ffffff; /* Warna dasar putih bersih */
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px; /* Padding lebih lega */
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    /* Transisi halus saat di-hover */
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+/* Efek saat mouse diarahkan ke box */
+.link-row:hover {
+    border-color: var(--accent); /* Border jadi biru */
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); /* Glow biru tipis */
+    transform: translateY(-1px); /* Naik sedikit */
+}
+
+.link-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+    margin-right: 20px;
+}
+
+/* PERBAIKAN WARNA LINK DI SINI */
+.short {
+    font-weight: 700;
+    font-size: 1.1rem; 
+    color: var(--accent); /* MENGGUNAKAN WARNA BIRU LINK */
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.short:hover {
+    text-decoration: underline; /* Garis bawah saat hover */
+    color: #1d4ed8; /* Biru lebih gelap saat hover */
+}
+
+.long {
+    font-size: 0.85rem;
+    color: #64748b; /* Abu-abu untuk link panjang */
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tombol Aksi (Copy, QR, dll) */
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 40px; /* Ukuran tombol diperbesar sedikit biar pas */
+    height: 40px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 6px; /* Radius sedikit lebih membulat */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+/* Hover tombol jadi biru */
+.btn-icon:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #eff6ff; /* Background biru sangat muda */
+}
+
+.btn-icon span { font-size: 20px; }
+
+/* --- RESPONSIVE MOBILE (HP) --- */
+@media (max-width: 768px) {
+    .link-row {
+        flex-direction: column; /* Tumpuk vertikal */
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .link-info {
+        width: 100%;
+        margin: 0;
+    }
+
+    .long {
+        max-width: 100%; /* Link panjang full width */
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: space-between; /* Tombol menyebar rata */
+        padding-top: 12px;
+        border-top: 1px dashed var(--border); /* Garis pemisah tipis */
+    }
+
+    .btn-icon {
+        flex: 1; /* Tombol melebar rata agar mudah dipencet */
+        height: 42px;
+    }
+}
+
+/* --- FOOTER MODERN (SAAS STYLE) --- */
+/* --- FOOTER SIMPEL & RAPI --- */
+/* --- FOOTER FIXED (CLEAN & PROFESSIONAL) --- */
+footer {
+    background: #ffffff; /* Putih Solid */
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    margin-top: auto;
+    width: 100%;
+}
+
+.footer-wrapper {
+    display: flex;
+    justify-content: space-between; /* Kiri & Kanan Berjarak */
+    align-items: flex-start;
+    gap: 40px;
+}
+
+/* SISI KIRI */
+.footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.brand-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.brand-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--accent); /* Biru */
+}
+
+.copyright-text {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Status Badge Kecil */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #16a34a; /* Hijau */
+    font-weight: 600;
+    background: #f0fdf4;
+    padding: 4px 10px;
+    border-radius: 20px;
+    width: fit-content;
+    border: 1px solid #dcfce7;
+}
+
+.dot-green {
+    width: 6px;
+    height: 6px;
+    background-color: #16a34a;
+    border-radius: 50%;
+}
+
+/* SISI KANAN */
+.footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Rata Kanan */
+    gap: 20px;
+}
+
+/* Menu Links Horizontal */
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.footer-links a {
+    text-decoration: none;
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--primary);
+}
+
+/* Social Icons (SVG) */
+.social-row {
+    display: flex;
+    gap: 12px;
+}
+
+.soc-icon {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    transition: all 0.2s;
+    background: #fff;
+}
+
+.soc-icon:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.soc-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- RESPONSIVE MOBILE (HP) --- */
+@media (max-width: 768px) {
+    .footer-wrapper {
+        flex-direction: column; /* Stack ke bawah */
+        align-items: center; /* Rata Tengah */
+        text-align: center;
+        gap: 30px;
+    }
+
+    .footer-left {
+        align-items: center; /* Logo di tengah */
+    }
+
+    .footer-right {
+        align-items: center; /* Link di tengah */
+        width: 100%;
+    }
+
+    .footer-links {
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 10px;
+    }
+}
+footer {
+    background: #ffffff;
+    
+    /* --- INI CARA BIKIN GARISNYA --- */
+    border-top: 2px solid #000; /* Ganti #e2e8f0 dengan warna lain (misal #000 untuk hitam) */
+    
+    /* Mau lebih tebal? Ubah 1px jadi 2px atau 3px */
+    /* border-top: 3px solid #000000; */
+    
+    padding: 40px 0;
+    margin-top: auto;
+    width: 100%;
+}
+header {
+    background: #ffffff;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    /* --- TAMBAHKAN INI --- */
+    border-bottom: 2px solid #000; /* Atau pakai var(--border) kalau ada */
+}
+/* 3. LAYAR PONSEL (Max 768px) - REVISI TEKS MUNCUL */
+@media (max-width: 768px) {
+    
+    /* --- A. PENGATURAN TEKS (Typography) --- */
+    h1 { 
+        font-size: 2rem;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+    }
+    
+    p.subtitle, 
+    .article-item p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    /* --- B. FITUR GRID (3 KOLOM DENGAN TEKS MUNCUL) --- */
+    .feature-grid-fixed {
+        gap: 8px; /* Jarak rapat */
+        padding: 0 8px;
+    }
+    
+    .feat-col {
+        /* Pastikan item flex vertikal */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .icon-wrap { 
+        width: 32px; 
+        height: 32px; 
+        margin-bottom: 6px; 
+    }
+
+    .feat-col h4 { 
+        font-size: 0.7rem; /* Judul kecil */
+        margin-bottom: 4px;
+        height: 20px; /* Tinggi judul minimal biar lurus */
+        display: flex;
+        align-items: center;
+    }
+    
+    .feat-col p { 
+        /* INI PERBAIKANNYA: HAPUS display: none */
+        display: block !important; 
+        
+        font-size: 0.6rem; /* Ukuran font sangat kecil agar muat */
+        line-height: 1.2;
+        color: #64748b;
+        max-width: 100%;
+        margin-top: 2px;
+    }
+
+    /* --- C. ARTIKEL FULL WIDTH --- */
+    .article-white-box {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        padding: 30px 20px;
+        border-radius: 0;
+        border-left: none; 
+        border-right: none;
+    }
+
+    /* --- D. FOOTER RAPI --- */
+    .footer-wrapper {
+        flex-direction: column;
+        gap: 30px;
+        text-align: center;
+    }
+    
+    .footer-left, .footer-right { align-items: center; width: 100%; }
+    .footer-links { justify-content: center; gap: 15px; }
+
+    /* --- E. LAYOUT TUMPUK (Input) --- */
+    .input-box {
+        flex-direction: column;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    .input-box input {
+        width: 100%;
+        background: #fff;
+        border: 2px solid var(--primary);
+        border-radius: var(--radius);
+        margin-bottom: 12px;
+        text-align: center;
+        height: 50px;
+    }
+    .btn-black { width: 100%; justify-content: center; height: 50px; }
+}
