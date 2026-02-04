@@ -1,7 +1,7 @@
 "use client";
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { siteConfig } from '../lib/config';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import { siteConfig } from '../../lib/config';
 
 export default function PrivacyPolicy() {
   return (
