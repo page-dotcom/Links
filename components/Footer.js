@@ -1,5 +1,5 @@
 import Link from 'next/link';
-
+import { siteConfig } from '../lib/config';
 export default function Footer() {
   return (
     <footer>
@@ -12,10 +12,10 @@ export default function Footer() {
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
-              ShortPro
+              {siteConfig.name}
             </Link>
             <p className="copyright-text">
-              &copy; 2026 ShortPro Inc.<br />All rights reserved.
+              &copy; 2026 {siteConfig.name} Inc.<br />All rights reserved.
             </p>
             
             <div className="status-badge">
@@ -25,8 +25,8 @@ export default function Footer() {
 
           <div className="footer-right">
             <div className="footer-links">
-              <Link href="#">Features</Link>
-              <Link href="#">Pricing</Link>
+              <Link href="/">Home</Link>
+              <Link href="#">URL Click Counter</Link>
               <Link href="#">Privacy</Link>
               <Link href="#">Terms</Link>
               <Link href="#">Contact</Link>
