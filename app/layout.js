@@ -1,6 +1,6 @@
 import './globals.css';
 import Script from 'next/script';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+
  
  
 export default function RootLayout({ children }) {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
       </head>
       <body style={{ margin: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {children}
-<SpeedInsights />
+
       </body>
     </html>
   );
