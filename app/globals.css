@@ -1,39 +1,52 @@
-/* --- 1. RESET & VARIABLES --- */
-        :root {
-            --primary: #0f172a;       /* Hitam Slate (Warna Utama) */
-            --accent: #2563eb;        /* Biru Aksen */
-            --danger: #ef4444;        /* Merah Error */
-            --success: #10b981;       /* Hijau Sukses */
-            
-            --bg-grid-color: #e2e8f0; /* Warna Garis Grid */
-            --bg-body: #f8fafc;       /* Warna Dasar Body */
-            --bg-surface: #ffffff;    /* Warna Header/Footer/Card */
-            
-            --border: #cbd5e1;
-            --radius: 6px;
-            --max-w: 850px;           /* Lebar Konten Ideal */
-        }
+/* --- OPTIMASI CEPAT --- */
+:root {
+    --primary: #0f172a;
+    --accent: #2563eb;
+    --danger: #ef4444;
+    --success: #10b981;
+    --bg-grid-color: #f1f5f9; /* Diperhalus biar render lebih cepet */
+    --bg-body: #f8fafc;
+    --bg-surface: #ffffff;
+    --border: #cbd5e1;
+    --radius: 8px; /* Lebih modern */
+    --max-w: 850px;
+}
 
-html {
-        scroll-behavior: smooth; /* Efek scroll halus native (ringan) */
-    }
+body {
+    color: var(--primary);
+    background-color: var(--bg-body);
+    /* Gunakan fixed background agar tidak repaint saat scroll */
+    background-image: 
+        linear-gradient(var(--bg-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid-color) 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-attachment: fixed; 
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Hindari Layout Shift pada Gambar/Icon */
+.icon-wrap svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    content-visibility: auto; /* Optimasi render browser */
+}
+
+/* Perbaikan Article Box agar tidak CLS */
+.article-white-box {
+    background: #ffffff;
+    border-top: 2px solid var(--primary); /* Biar retro-nya dapet */
+    border-bottom: 2px solid var(--primary);
+    padding: 60px 0;
+    margin: 60px 0;
+    width: 100%; /* Jangan pake vw kalau mau skor ijo */
+    box-shadow: inset 0 10px 20px -10px rgba(0,0,0,0.05);
+}
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; font-family: 'Open Sans', sans-serif;}
 
-        body {
-            color: var(--primary);
-            background-color: var(--bg-body);
-            
-            /* --- BACKGROUND KOTAK-KOTAK (GRID) --- */
-            background-image: 
-                linear-gradient(var(--bg-grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--bg-grid-color) 1px, transparent 1px);
-            background-size: 30px 30px; /* Ukuran kotak */
-            
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        
 
         /* Container Pengunci Lebar */
         .container {
@@ -849,98 +862,4 @@ header {
 
     /* --- TAMBAHKAN INI --- */
     border-bottom: 2px solid #000; /* Atau pakai var(--border) kalau ada */
-}
-/* 3. LAYAR PONSEL (Max 768px) - REVISI TEKS MUNCUL */
-@media (max-width: 768px) {
-    
-    /* --- A. PENGATURAN TEKS (Typography) --- */
-    h1 { 
-        font-size: 2rem;
-        line-height: 1.2;
-        letter-spacing: -0.5px;
-    }
-    
-    p.subtitle, 
-    .article-item p {
-        font-size: 0.95rem;
-        line-height: 1.5;
-    }
-
-    /* --- B. FITUR GRID (3 KOLOM DENGAN TEKS MUNCUL) --- */
-    .feature-grid-fixed {
-        gap: 8px; /* Jarak rapat */
-        padding: 0 8px;
-    }
-    
-    .feat-col {
-        /* Pastikan item flex vertikal */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-    }
-
-    .icon-wrap { 
-        width: 32px; 
-        height: 32px; 
-        margin-bottom: 6px; 
-    }
-
-    .feat-col h4 { 
-        font-size: 0.7rem; /* Judul kecil */
-        margin-bottom: 4px;
-        height: 20px; /* Tinggi judul minimal biar lurus */
-        display: flex;
-        align-items: center;
-    }
-    
-    .feat-col p { 
-        /* INI PERBAIKANNYA: HAPUS display: none */
-        display: block !important; 
-        
-        font-size: 0.6rem; /* Ukuran font sangat kecil agar muat */
-        line-height: 1.2;
-        color: #64748b;
-        max-width: 100%;
-        margin-top: 2px;
-    }
-
-    /* --- C. ARTIKEL FULL WIDTH --- */
-    .article-white-box {
-        width: 100vw;
-        margin-left: calc(-50vw + 50%);
-        padding: 30px 20px;
-        border-radius: 0;
-        border-left: none; 
-        border-right: none;
-    }
-
-    /* --- D. FOOTER RAPI --- */
-    .footer-wrapper {
-        flex-direction: column;
-        gap: 30px;
-        text-align: center;
-    }
-    
-    .footer-left, .footer-right { align-items: center; width: 100%; }
-    .footer-links { justify-content: center; gap: 15px; }
-
-    /* --- E. LAYOUT TUMPUK (Input) --- */
-    .input-box {
-        flex-direction: column;
-        padding: 0;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-    }
-    .input-box input {
-        width: 100%;
-        background: #fff;
-        border: 2px solid var(--primary);
-        border-radius: var(--radius);
-        margin-bottom: 12px;
-        text-align: center;
-        height: 50px;
-    }
-    .btn-black { width: 100%; justify-content: center; height: 50px; }
 }
