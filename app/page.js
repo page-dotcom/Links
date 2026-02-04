@@ -74,7 +74,7 @@ export default function Home() {
 
   const copyResult = (text) => {
     navigator.clipboard.writeText(text);
-    showToast("Link disalin!");
+    showToast("Link copied!");
   };
 
   const openQR = (link) => {
