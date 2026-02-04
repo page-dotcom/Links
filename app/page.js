@@ -26,13 +26,9 @@ export default function Home() {
   const processLink = async () => {
     if (!url.trim()) return triggerToast("Mohon isi URL!", "error");
     setLoading(true);
-    
     const slug = Math.random().toString(36).substring(2, 7);
     const fullLink = `${window.location.origin}/${slug}`;
-
-    const { error } = await supabase
-      .from('links')
-      .insert([{ original_url: url, slug: slug, clicks: 0 }]);
+    const { error } = await supabase.from('links').insert([{ original_url: url, slug: slug, clicks: 0 }]);
 
     if (!error) {
       setHasil(fullLink);
@@ -42,8 +38,6 @@ export default function Home() {
       localStorage.setItem('recentLinks', JSON.stringify(newRecent));
       triggerToast("Link berhasil dibuat!", "success");
       setUrl('');
-    } else {
-      triggerToast("Gagal menyimpan!", "error");
     }
     setLoading(false);
   };
@@ -52,29 +46,13 @@ export default function Home() {
     const updated = recentLinks.filter((_, i) => i !== index);
     setRecentLinks(updated);
     localStorage.setItem('recentLinks', JSON.stringify(updated));
-    triggerToast("Riwayat dihapus", "success");
-  };
-
-  const copyText = (text) => {
-    navigator.clipboard.writeText(text);
-    triggerToast("Disalin ke clipboard!", "success");
-  };
-
-  const downloadQR = (link, slug) => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
-    fetch(qrUrl).then(res => res.blob()).then(blob => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `QR-ShortPro-${slug}.png`;
-      a.click();
-      triggerToast("QR Code diunduh!", "success");
-    });
   };
 
   return (
     <>
       <Header />
       <main>
+        {/* CONTAINER UTAMA */}
         <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           
           <div className="hero-text">
@@ -83,7 +61,6 @@ export default function Home() {
           </div>
 
           <div className="input-wrapper">
-            {/* --- STATE INPUT --- */}
             {!showResult ? (
               <div id="state-input" className="input-box">
                 <input 
@@ -93,48 +70,43 @@ export default function Home() {
                   placeholder="Tempel URL panjang di sini..." 
                   required 
                 />
-                <button className="btn-black" onClick={processLink} disabled={loading}>
-                  {loading ? '...' : 'Shorten'}
+                <button className="btn-black" onClick={processLink}>
+                  Shorten
                   <span className="material-symbols-rounded">arrow_forward</span>
                 </button>
               </div>
             ) : (
-              /* --- STATE RESULT --- */
               <div id="state-result" className="result-box" style={{ display: 'flex' }}>
                 <span className="material-symbols-rounded" style={{ color: 'var(--accent)' }}>check_circle</span>
                 <span id="finalLink" className="result-text">{hasil}</span>
-                <button className="btn-black copy" style={{ background: 'var(--accent)' }} onClick={() => copyText(hasil)}>
+                <button className="btn-black copy" style={{ background: 'var(--accent)' }} onClick={() => {navigator.clipboard.writeText(hasil); triggerToast("Copied!", "success")}}>
                   Copy Link
                 </button>
-                <button className="btn-icon" onClick={() => setShowResult(false)} title="Reset">
+                <button className="btn-icon" onClick={() => setShowResult(false)}>
                   <span className="material-symbols-rounded">refresh</span>
                 </button>
               </div>
             )}
           </div>
 
-          {/* LOGIKA: Hanya muncul jika ada data di recentLinks */}
+          {/* RECENT SECTION - Otomatis sembunyi jika kosong */}
           {recentLinks.length > 0 && (
             <div className="recent-section">
               <span className="section-label">Your Recent Links:</span>
-              
               {recentLinks.map((item, index) => (
-                <div key={index} className="link-row">
+                <div className="link-row" key={index}>
                   <div className="link-info">
                     <a href={item.short} target="_blank" className="short">{item.short.replace(/^https?:\/\//, '')}</a>
                     <span className="long">{item.original}</span>
                   </div>
                   <div className="actions">
-                    <button className="btn-icon" title="Copy" onClick={() => copyText(item.short)}>
+                    <button className="btn-icon" onClick={() => {navigator.clipboard.writeText(item.short); triggerToast("Copied!", "success")}}>
                       <span className="material-symbols-rounded">content_copy</span>
                     </button>
-                    <button className="btn-icon" title="QR Code" onClick={() => downloadQR(item.short, item.slug)}>
-                      <span className="material-symbols-rounded">qr_code_2</span>
-                    </button>
-                    <Link href={`/stats?slug=${item.slug}`} className="btn-icon" title="Analytics">
+                    <Link href={`/stats?slug=${item.slug}`} className="btn-icon">
                       <span className="material-symbols-rounded">bar_chart</span>
                     </Link>
-                    <button className="btn-icon" title="Hapus" onClick={() => deleteRecent(index)} style={{color: '#ff4d4d'}}>
+                    <button className="btn-icon" onClick={() => deleteRecent(index)} style={{color: 'red'}}>
                       <span className="material-symbols-rounded">delete</span>
                     </button>
                   </div>
@@ -142,9 +114,9 @@ export default function Home() {
               ))}
             </div>
           )}
-
         </div>
 
+        {/* PREMIUM BOX - Gak gue rubah strukturnya */}
         <div className="premium-box">
           <div className="premium-content">
             <div className="premium-header">
@@ -160,6 +132,7 @@ export default function Home() {
           </button>
         </div>
 
+        {/* CONTENT BOTTOM AREA */}
         <div className="content-wrapper-bottom">
           <div className="article-white-box">
             <div className="article-inner">
@@ -208,6 +181,7 @@ export default function Home() {
       </main>
       <Footer />
 
+      {/* TOAST NOTIF */}
       <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
         <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
         <span>{toast.msg}</span>
