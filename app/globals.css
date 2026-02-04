@@ -14,17 +14,24 @@
 
 body {
     color: var(--primary);
-    background-color: var(--bg-body);
-    /* Gunakan fixed background agar tidak repaint saat scroll */
-    background-image: 
-        linear-gradient(var(--bg-grid-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--bg-grid-color) 1px, transparent 1px);
-    background-size: 30px 30px;
-    background-attachment: fixed; 
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
+    background-color: var(--bg-body); /* Pakai #f8fafc */
+    
+    /* HAPUS BAGIAN LINEAR-GRADIENT & GRID SIZE DI SINI */
+    
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
+/* Biar h1 lo gak aneh karena gak ada grid lagi */
+h1 {
+    font-size: 2.8rem;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    background: transparent; /* Ubah dari var(--bg-body) ke transparent */
+    display: inline-block;
+}
 /* Hindari Layout Shift pada Gambar/Icon */
 .icon-wrap svg {
     display: block;
