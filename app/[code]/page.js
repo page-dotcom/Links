@@ -3,7 +3,6 @@ import { redirect, notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { siteConfig } from '../../lib/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,105 +23,84 @@ export default async function RedirectPage({ params, searchParams }) {
   return (
     <>
       <Header />
-      <main style={{ background: '#ffffff', minHeight: '100vh', color: '#1a1a1a', padding: '40px 20px' }}>
-        <div style={{ maxWidth: '650px', margin: '0 auto' }}>
+      <main style={{ background: '#ffffff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ maxWidth: '500px', width: '100%', textAlign: 'left' }}>
           
-          {/* 1. Header Artikel - Font Adaptif agar tidak tumpang tindih */}
-          <div style={{ marginBottom: '32px', borderBottom: '1px solid #f1f5f9', paddingBottom: '20px' }}>
-            <h1 style={{ 
-              fontSize: 'clamp(1.5rem, 6vw, 2.2rem)', // Mengecil otomatis di layar kecil
-              fontWeight: '850', 
-              lineHeight: '1.2', 
-              marginBottom: '12px', 
-              color: '#0f172a',
-              letterSpacing: '-0.03em' 
-            }}>
-              Security Brief: Review Your Destination Before Proceeding
-            </h1>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '0.85rem', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase' }}>
-              <span>Security Check</span>
-              <span>•</span>
-              <span>Redirect Verified</span>
-            </div>
+          {/* Judul Kecil & Rapi */}
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
+            You are being redirected to:
+          </h2>
+
+          {/* Box URL Minimalis - Tidak Terlalu Bulat */}
+          <div style={{ 
+            background: '#111', 
+            padding: '16px', 
+            borderRadius: '8px', 
+            fontFamily: 'monospace', 
+            fontSize: '0.85rem', 
+            color: '#fff',
+            wordBreak: 'break-all',
+            marginBottom: '20px',
+            lineHeight: '1.4',
+            border: '1px solid #333'
+          }}>
+            {data.original_url}
           </div>
 
-          {/* 2. Box URL - Simpel & Bersih */}
-          <section style={{ marginBottom: '48px' }}>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.6', color: '#475569', marginBottom: '24px' }}>
-              You are about to be redirected to an external website. For your protection, please verify that the destination URL below is intended and safe.
-            </p>
+          {/* Teks Deskripsi - Ukuran Font Standar agar tidak tumpang tindih */}
+          <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#333', marginBottom: '24px' }}>
+            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. We never ask for your sensitive details.
+          </p>
 
-            <div style={{ 
-              background: '#f8fafc', 
-              padding: '20px', 
+          {/* Tombol Aksi - Rapi & Sejajar */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <a href="/" style={{ 
+              flex: 1, 
+              textAlign: 'center', 
+              padding: '14px', 
+              background: '#222', 
+              color: '#fff', 
               borderRadius: '8px', 
-              fontFamily: 'monospace', 
+              textDecoration: 'none', 
               fontSize: '0.9rem', 
-              border: '1px solid #e2e8f0',
-              wordBreak: 'break-all',
-              color: '#1e293b',
-              marginBottom: '32px',
-              lineHeight: '1.5'
+              fontWeight: '700' 
             }}>
-              <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: '800' }}>DESTINATION URL</span>
-              {data.original_url}
-            </div>
+              Back
+            </a>
+            <a 
+              href={`/${code}?a=confirm`}
+              id="actionBtn"
+              style={{ 
+                flex: 1, 
+                textAlign: 'center', 
+                padding: '14px', 
+                background: '#fff', 
+                color: '#000', 
+                borderRadius: '8px', 
+                textDecoration: 'none', 
+                fontSize: '0.9rem', 
+                fontWeight: '700',
+                border: '1px solid #ddd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              Continue <span style={{fontSize: '18px'}}>→</span>
+            </a>
+          </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-              <a 
-                href={`/${code}?a=confirm`}
-                id="actionBtn"
-                style={{ 
-                  background: '#0f172a', 
-                  color: '#fff', 
-                  width: '100%',
-                  textAlign: 'center',
-                  padding: '16px', 
-                  borderRadius: '12px', 
-                  textDecoration: 'none', 
-                  fontWeight: '700',
-                  fontSize: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                Continue to Website
-                <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>arrow_forward</span>
-              </a>
-              <a href="/" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600' }}>
-                Cancel and return home
-              </a>
-            </div>
-          </section>
+          {/* Footer Info Kecil */}
+          <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid #eee' }}>
+            <p style={{ fontSize: '0.75rem', color: '#888', lineHeight: '1.4' }}>
+              💡 If you received this link via suspicious email or message, please double check before continuing. Report this link if you find it suspicious.
+            </p>
+          </div>
 
-          {/* 3. Artikel Edukasi - Rapi & SEO Friendly */}
-          <article style={{ lineHeight: '1.8', color: '#334155', fontSize: '1rem', borderTop: '2px solid #f1f5f9', paddingTop: '40px' }}>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-              Why We Use Redirect Confirmation
-            </h2>
-            <p style={{ marginBottom: '20px' }}>
-              Transparency is the core of <strong>{siteConfig.name}</strong>. Shortened links are convenient but can hide the final destination. This intermediate step ensures that you, the user, have full control over where you are going before any external code is executed in your browser.
-            </p>
-            
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '12px', color: '#0f172a' }}>
-              Session Memory
-            </h3>
-            <p style={{ marginBottom: '20px' }}>
-              Once you click "Continue", our system will securely remember your confirmation for the next 10 minutes. This allows you to access this specific link directly without seeing this security brief again during your current session.
-            </p>
-
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '12px', color: '#0f172a' }}>
-              Your Privacy Matters
-            </h3>
-            <p>
-              We prioritize your digital safety. We do not collect personal data on this page. Our only goal is to provide a clear, secure path to your destination while preventing automated phishing attempts on <strong>{siteConfig.domain}</strong>.
-            </p>
-          </article>
         </div>
 
-        {/* Script Otomatisasi URL & Cookies */}
+        {/* Script Otomatis URL & Cookie 10 Menit */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             const url = new URL(window.location);
