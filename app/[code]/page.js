@@ -1,13 +1,13 @@
 import { supabase } from '../../lib/supabase';
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 
-// WAJIB: Biar gak kena cache Vercel, jadi setiap klik beneran kehitung
+// WAJIB: Biar setiap klik beneran kehitung & gak kena cache
 export const dynamic = 'force-dynamic';
 
 export default async function RedirectPage({ params }) {
   const { code } = params;
 
-  // 1. Cari datanya dulu
+  // 1. Cari data slug di database
   const { data } = await supabase
     .from('links')
     .select('*')
@@ -15,25 +15,19 @@ export default async function RedirectPage({ params }) {
     .single();
 
   if (data) {
-    // 2. Update jumlah klik pake cara yang lebih aman (increment)
-    // Kita ambil klik yang sekarang, tambah 1
-    const jumlahKlikBaru = (data.clicks || 0) + 1;
+    // 2. Update jumlah klik (Increment)
+    const newClicks = (data.clicks || 0) + 1;
 
     await supabase
       .from('links')
-      .update({ clicks: jumlahKlikBaru })
+      .update({ clicks: newClicks })
       .eq('id', data.id);
 
-    // 3. Lempar ke URL asli
+    // 3. Redirect ke URL asli
     redirect(data.original_url);
   }
 
-  // Kalau slug gak ada
-  return (
-    <div style={{ textAlign: 'center', marginTop: '100px', fontFamily: 'sans-serif' }}>
-      <h1>{"404"}</h1>
-      <p>{"Link gak ada atau sudah dihapus!"}</p>
-      <a href="/">{"Balik ke Home"}</a>
-    </div>
-  );
+  // 4. Kalau slug GAK ADA, panggil fungsi notFound()
+  // Ini bakal otomatis nampilin halaman mewah yang kita bikin di app/not-found.js
+  notFound();
 }
