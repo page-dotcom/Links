@@ -1,22 +1,14 @@
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import './globals.css'; // Pastikan CSS Custom lo ada di sini
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id">
+    <html lang="en">
       <head>
-        {/* Script QR Lokal: Biar gak ketergantungan API luar yang sering error */}
-        <script 
-          src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" 
-          strategy="beforeInteractive"
-        ></script>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
       </head>
-      <body style={{ margin: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-        <Header />
-        <main style={{ flex: 1 }}>
-          {children}
-        </main>
-        <Footer />
+      <body style={{ margin: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {children}
       </body>
     </html>
   );
