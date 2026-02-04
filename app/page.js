@@ -11,8 +11,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [recentLinks, setRecentLinks] = useState([]);
   const [showResult, setShowResult] = useState(false);
-  
-  // State untuk Toast (Gantiin fungsi showToast manual)
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
 
   useEffect(() => {
@@ -20,149 +18,98 @@ export default function Home() {
     setRecentLinks(saved);
   }, []);
 
-  const triggerToast = (message, type) => {
+  const showToast = (message, type) => {
     setToast({ show: true, msg: message, type });
     setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000);
   };
 
+  // FUNGSI DOWNLOAD QR LOKAL (Pake library dari layout)
+  const downloadQRLokal = (linkShort, slug) => {
+    // Cari wadah sementara
+    const div = document.createElement("div");
+    new window.QRCode(div, {
+      text: linkShort,
+      width: 500,
+      height: 500
+    });
+
+    // Tunggu sebentar sampe library beres gambar
+    setTimeout(() => {
+      const img = div.querySelector("img");
+      if (img) {
+        const a = document.createElement("a");
+        a.href = img.src;
+        a.download = `QR-${slug}.png`;
+        a.click();
+        showToast("QR Berhasil Diunduh!", "success");
+      } else {
+        showToast("Gagal generate QR!", "error");
+      }
+    }, 100);
+  };
+
   const processLink = async () => {
-    const input = url.trim().toLowerCase();
-
-    // VALIDASI 1: Cek Kosong
-    if (!input) {
-      triggerToast("Mohon isi URL terlebih dahulu!", "error");
-      return;
-    }
-
-    // VALIDASI 2: Blacklist
-    const blacklist = ["localhost", "127.0.0.1", "tes.vercel.app", window.location.hostname.toLowerCase()];
-    if (blacklist.some(kata => input.includes(kata))) {
-      triggerToast("Link ini dilarang untuk dipendekkan!", "error");
-      return;
-    }
-
+    if (!url) return showToast("Isi URL-nya, Bos!", "error");
     setLoading(true);
     const slug = Math.random().toString(36).substring(2, 7);
     const fullLink = `${window.location.origin}/${slug}`;
 
-    // Simpan ke Supabase
-    const { error } = await supabase
-      .from('links')
-      .insert([{ original_url: url, slug: slug, clicks: 0 }]);
+    const { error } = await supabase.from('links').insert([{ original_url: url, slug: slug, clicks: 0 }]);
 
-    if (error) {
-      triggerToast("Gagal menyimpan ke database!", "error");
-    } else {
+    if (!error) {
       setHasil(fullLink);
       setShowResult(true);
-      
       const newRecent = [{ original: url, short: fullLink, slug: slug }, ...recentLinks].slice(0, 5);
       setRecentLinks(newRecent);
       localStorage.setItem('recentLinks', JSON.stringify(newRecent));
-      
-      triggerToast("Link berhasil dibuat!", "success");
+      showToast("Link Jadi!", "success");
     }
     setLoading(false);
-  };
-
-  const resetForm = () => {
-    setUrl('');
-    setHasil('');
-    setShowResult(false);
-  };
-
-  const copyText = (text) => {
-    navigator.clipboard.writeText(text);
-    triggerToast("Disalin ke clipboard!", "success");
-  };
-
-  const downloadQR = (link, slug) => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
-    fetch(qrUrl).then(res => res.blob()).then(blob => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `QR-ShortPro-${slug}.png`;
-      a.click();
-      triggerToast("QR Code berhasil diunduh!", "success");
-    });
   };
 
   return (
     <>
       <Header />
-      <main>
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          
-          <div className="hero-text">
-            <h1>Shorten URLs,<br />Expand Reach.</h1>
-            <p className="subtitle">Aplikasi pemendek tautan profesional. Masukkan link panjang di bawah.</p>
-          </div>
-
-          <div className="input-wrapper">
-            {!showResult ? (
-              <div id="state-input" className="input-box">
-                <input 
-                  type="url" 
-                  value={url} 
-                  onChange={(e) => setUrl(e.target.value)} 
-                  placeholder="Tempel URL panjang di sini..." 
-                />
-                <button className="btn-black" onClick={processLink} disabled={loading}>
-                  {loading ? '...' : 'Shorten'}
-                  <span className="material-symbols-rounded">arrow_forward</span>
-                </button>
-              </div>
-            ) : (
-              <div id="state-result" className="result-box" style={{ display: 'flex' }}>
-                <span className="material-symbols-rounded" style={{ color: 'var(--accent)' }}>check_circle</span>
-                <span className="result-text">{hasil}</span>
-                <button className="btn-black copy" style={{ background: 'var(--accent)' }} onClick={() => copyText(hasil)}>
-                  Copy Link
-                </button>
-                <button className="btn-icon" onClick={resetForm}>
-                  <span className="material-symbols-rounded">refresh</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="recent-section">
-            <span className="section-label">Your Recent Links:</span>
-            {recentLinks.map((item, index) => (
-              <div key={index} className="link-row">
-                <div className="link-info">
-                  <a href={item.short} target="_blank" className="short">{item.short.replace(/^https?:\/\//, '')}</a>
-                  <span className="long">{item.original}</span>
-                </div>
-                <div className="actions">
-                  <button className="btn-icon" title="Copy" onClick={() => copyText(item.short)}>
-                    <span className="material-symbols-rounded">content_copy</span>
-                  </button>
-                  <button className="btn-icon" title="QR Code" onClick={() => downloadQR(item.short, item.slug)}>
-                    <span className="material-symbols-rounded">qr_code_2</span>
-                  </button>
-                  <Link href={`/stats?slug=${item.slug}`} className="btn-icon" title="Analytics">
-                    <span className="material-symbols-rounded">bar_chart</span>
-                  </Link>
-                  <button className="btn-icon" title="View URL" onClick={() => window.open(item.original, '_blank')}>
-                    <span className="material-symbols-rounded">open_in_new</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+      <main className="container">
+        {/* Template Input lo di sini */}
+        <div className="input-wrapper">
+          {!showResult ? (
+            <div className="input-box">
+              <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste URL..." />
+              <button onClick={processLink} className="btn-black">{loading ? '...' : 'Shorten'}</button>
+            </div>
+          ) : (
+            <div className="result-box" style={{display:'flex'}}>
+              <span className="result-text">{hasil}</span>
+              <button onClick={() => {navigator.clipboard.writeText(hasil); showToast("Copied!", "success")}}>Copy</button>
+              <button onClick={() => setShowResult(false)}>Reset</button>
+            </div>
+          )}
         </div>
 
-        {/* --- Bagian Premium & Article Sesuai Template Lo --- */}
-        <div className="premium-box">
-            {/* Isi premium box lo di sini */}
+        {/* Recent Links Sesuai Template lo */}
+        <div className="recent-section">
+          {recentLinks.map((item, i) => (
+            <div key={i} className="link-row">
+              <div className="link-info">
+                <span className="short">{item.short}</span>
+              </div>
+              <div className="actions">
+                <button onClick={() => downloadQRLokal(item.short, item.slug)} className="btn-icon" title="Download QR">
+                  <span className="material-symbols-rounded">qr_code_2</span>
+                </button>
+                <Link href={`/stats?slug=${item.slug}`} className="btn-icon">
+                  <span className="material-symbols-rounded">bar_chart</span>
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
       <Footer />
-
-      {/* Toast Notification Terintegrasi */}
-      <div id="toast" className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
-        <span className="material-symbols-rounded">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
+      
+      {/* Toast Notification */}
+      <div className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
         <span>{toast.msg}</span>
       </div>
     </>
