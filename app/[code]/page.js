@@ -1,88 +1,125 @@
+"use client";
+import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { siteConfig } from '../../lib/config';
-import { redirect, notFound } from 'next/navigation';
-import { cookies, headers } from 'next/headers';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
-// MATIKAN SEMUA CACHE - WAJIB!
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-export default async function RedirectPage({ params, searchParams }) {
+export default function RedirectPage({ params }) {
   const { code } = params;
-  const isConfirmAction = searchParams.a === 'confirm';
-  const cookieStore = cookies();
-  const userHeaders = headers();
-  
-  // 1. Tarik data dari DB
-  const { data } = await supabase.from('links').select('*').eq('slug', code).single();
-  if (!data) notFound();
+  const [data, setData] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false); // Default sembunyi dulu
+  const [loading, setLoading] = useState(true);
 
-  // 2. DETEKSI BOT: Langsung lempar (Biar preview WA/FB muncul)
-  const userAgent = userHeaders.get('user-agent') || '';
-  const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot/i.test(userAgent);
-  if (isBot) return redirect(data.original_url);
-
-  // 3. LOGIC UTAMA: Jika user punya cookie, LANGSUNG HIT DB & REDIRECT
-  // Ini ditaruh paling atas sebelum ngerender apapun
-  if (cookieStore.has(`skip_${code}`)) {
-    await supabase.rpc('increment_clicks', { row_id: data.id });
-    return redirect(data.original_url);
-  }
-
-  // 4. Jika baru pertama datang (gak ada cookie), paksa ke confirm
-  if (!isConfirmAction) {
-    return redirect(`/${code}?a=confirm`);
-  }
-
-  return (
-    <>
-      <Header />
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
+  useEffect(() => {
+    async function init() {
+      // 1. Ambil data link
+      const { data: linkData } = await supabase.from('links').select('*').eq('slug', code).single();
       
-      {/* JAVASCRIPT CADANGAN: Jika server telat baca cookie, browser yang nendang */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        if (document.cookie.includes("skip_${code}=true")) {
-          window.location.replace("${data.original_url}");
-        }
-      `}} />
+      if (!linkData) {
+        window.location.href = '/404';
+        return;
+      }
+      setData(linkData);
 
-      <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
-            You are being redirected to:
-          </h2>
+      // 2. CEK COOKIE (Apakah user ini barusan akses dalam 10 menit terakhir?)
+      const cookieName = `seen_${code}`;
+      const hasSeen = document.cookie.split('; ').find(row => row.startsWith(`${cookieName}=`));
 
-          <div style={{ 
-            background: '#111', padding: '18px', borderRadius: '8px', 
-            fontFamily: 'monospace', fontSize: '0.9rem', color: '#fff',
-            wordBreak: 'break-all', marginBottom: '24px', border: '1px solid #333', lineHeight: '1.5'
-          }}>
-            {data.original_url}
-          </div>
+      // LOGIKA DIBALIK SESUAI PERMINTAAN LO:
+      
+      if (!hasSeen) {
+        // --- SKENARIO 1: AKSES PERTAMA (Belum ada cookie) ---
+        // Tindakan: Redirect Langsung + Pasang Cookie 10 Menit
+        
+        // a. Track Klik di Supabase
+        await supabase.rpc('increment_clicks', { row_id: linkData.id });
 
-          <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-            This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for ва personal information.</u></strong>
-          </p>
+        // b. Pasang Cookie "seen" (Expired 10 menit / 600 detik)
+        document.cookie = `${cookieName}=true; max-age=600; path=/`;
 
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-            <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
-              Back
-            </a>
-            <a 
-              href={data.original_url}
-              id="finalAction"
-              style={{ 
-                flex: 1, textAlign: 'center', padding: '16px', background: '#000', color: '#fff', 
-                borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-              }}
-            >
-              Continue <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '20px' }}>arrow_forward</span>
-            </a>
-          </div>
+        // c. Redirect Langsung (Pake timeout dikit biar Histats sempet loading)
+        setTimeout(() => {
+          window.location.replace(linkData.original_url);
+        }, 800); // Delay 0.8 detik buat loading tracker
+      } 
+      else {
+        // --- SKENARIO 2: AKSES KEDUA (Cookie masih ada) ---
+        // Tindakan: Munculin Halaman Konfirmasi
+        setLoading(false);
+        setShowConfirm(true);
+      }
+    }
 
+    init();
+  }, [code]);
+
+  // Fungsi buat tombol Continue di halaman konfirmasi
+  const handleManualContinue = async () => {
+    if (!data) return;
+    await supabase.rpc('increment_clicks', { row_id: data.id });
+    window.location.replace(data.original_url);
+  };
+
+  // TAMPILAN LOADING (Pas akses pertama, user liat ini bentar sebelum mental)
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Masukin Script Histats di sini biar kebaca pas loading */}
+        {/* Contoh: <script ... histats ... ></script> */}
+        <p style={{ fontFamily: 'monospace', color: '#666' }}>Redirecting...</p>
+      </div>
+    );
+  }
+
+  // TAMPILAN HALAMAN KONFIRMASI (Muncul cuma di akses kedua)
+  if (showConfirm && data) {
+    return (
+      <>
+        <Header />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
+        
+        <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
+            
+            <h2 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
+              Security Check
+            </h2>
+
+            <div style={{ 
+              background: '#fff', border: '1px solid #eee', padding: '18px', borderRadius: '8px', 
+              marginBottom: '24px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+            }}>
+              <p style={{ fontSize: '0.9rem', color: '#444', marginBottom: '10px' }}>
+                You are visiting this link frequently. Please confirm to proceed to:
+              </p>
+              <div style={{ fontFamily: 'monospace', color: '#0070f3', wordBreak: 'break-all' }}>
+                {data.original_url}
+              </div>
+            </div>
+            
+            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
+           This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
+           </p>
+
+
+
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
+              <button 
+                onClick={handleManualContinue}
+                style={{ 
+                  flex: 1, padding: '16px', background: '#000', color: '#fff', 
+                  borderRadius: '8px', border: 'none', fontSize: '0.9rem', fontWeight: '700',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                }}
+              >
+                Continue <span className="material-symbols-rounded notranslate" style={{ fontSize: '20px' }}>arrow_forward</span>
+              </button>
+            </div>
+
+            {/* Area Report */}
+            <div style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
+               {/* AREA REPORT */}
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', color: '#64748b', fontSize: '0.85rem' }}>
               <span className="material-symbols-rounded notranslate" translate="no" style={{ color: '#000', fontSize: '22px' }}>lightbulb</span>
@@ -95,17 +132,12 @@ export default async function RedirectPage({ params, searchParams }) {
           </div>
         </div>
 
-        {/* CLICK HANDLER: Masang cookie & Redirect */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          document.getElementById('finalAction').addEventListener('click', function(e) {
-            e.preventDefault();
-            // Masang cookie level ROOT biar kebaca server
-            document.cookie = "skip_${code}=true; max-age=86400; path=/";
-            window.location.replace("${data.original_url}");
-          });
-        `}} />
-      </main>
-      <Footer />
-    </>
-  );
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  return null;
 }
