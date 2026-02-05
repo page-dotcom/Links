@@ -159,7 +159,7 @@ export default function Home() {
             <div className="premium-box">
                 <div className="premium-content">
                     <div className="premium-header">
-                        <span className="material-symbols-rounded icon-star">verified</span>
+                        <span className="material-symbols-rounded icon-star notranslate" translate="no">verified</span>
                         <h3>Want More? Try Premium Features!</h3>
                     </div>
                     <p className="premium-desc">
