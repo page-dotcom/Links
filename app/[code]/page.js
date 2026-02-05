@@ -6,7 +6,7 @@ import Footer from '../../components/Footer';
 
 export const dynamic = 'force-dynamic';
 
-// FUNGSI UNTUK CLONE METADATA DARI URL TUJUAN
+// FUNGSI CLONE METADATA DARI SUMBER (URL TUJUAN)
 export async function generateMetadata({ params }) {
   const { code } = params;
   const { data } = await supabase.from('links').select('original_url').eq('slug', code).single();
@@ -14,22 +14,37 @@ export async function generateMetadata({ params }) {
   if (!data) return { title: "Link Not Found" };
 
   try {
-    // Kita kasih instruksi ke bot biar "seolah-olah" ini adalah web aslinya
+    // Ambil HTML dari URL tujuan untuk scraping metatag asli
+    const response = await fetch(data.original_url, { next: { revalidate: 3600 } });
+    const html = await response.text();
+
+    // Regex sederhana untuk ambil Title, Description, dan Image asli
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+    const descMatch = html.match(/<meta name="description" content="(.*?)"/i) || html.match(/<meta property="og:description" content="(.*?)"/i);
+    const imageMatch = html.match(/<meta property="og:image" content="(.*?)"/i);
+
+    const remoteTitle = titleMatch ? titleMatch[1] : "Safe Redirect";
+    const remoteDesc = descMatch ? descMatch[1] : data.original_url;
+    const remoteImg = imageMatch ? imageMatch[1] : "/og-image.jpg";
+
     return {
-      title: "Redirecting...", 
-      description: "You are being redirected to an external link.",
+      title: remoteTitle,
+      description: remoteDesc,
       openGraph: {
-        title: "Link Redirecting...",
-        description: data.original_url,
+        title: remoteTitle,
+        description: remoteDesc,
+        images: [remoteImg],
         url: data.original_url,
       },
-      // Trick: Kadang bot butuh metadata manual kalau scraping berat
-      other: {
-        "og:url": data.original_url,
+      twitter: {
+        card: "summary_large_image",
+        title: remoteTitle,
+        description: remoteDesc,
+        images: [remoteImg],
       }
     };
   } catch (e) {
-    return { title: "Secure Redirect" };
+    return { title: "Secure Redirect", description: data.original_url };
   }
 }
 
@@ -47,40 +62,38 @@ export default async function RedirectPage({ params, searchParams }) {
     redirect(data.original_url);
   }
 
-  const reportUrl = `https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`;
-
   return (
     <>
       <Header />
-      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-        <div style={{ maxWidth: '500px', width: '100%' }}>
+      <main style={{ background: '#ffffff', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: '500px', width: '100%', textAlign: 'left' }}>
           
           <h2 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
-            Anda akan dialihkan ke:
+            You are being redirected to:
           </h2>
 
           <div style={{ 
             background: '#111', 
-            padding: '20px', 
+            padding: '16px', 
             borderRadius: '8px', 
             fontFamily: 'monospace', 
-            fontSize: '0.9rem', 
+            fontSize: '0.85rem', 
             color: '#fff',
             wordBreak: 'break-all',
-            marginBottom: '24px',
-            lineHeight: '1.5',
+            marginBottom: '20px',
+            lineHeight: '1.4',
             border: '1px solid #333'
           }}>
             {data.original_url}
           </div>
 
-          <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-            Tautan ini dibuat oleh <strong>pengguna publik</strong>. Silakan periksa tautan di atas sebelum melanjutkan. <strong>Kami tidak pernah menanyakan informasi detail anda.</strong>
+          <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#333', marginBottom: '24px' }}>
+            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. <strong>We never ask for your sensitive details.</strong>
           </p>
 
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-            <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '700' }}>
-              Kembali
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
+            <a href="/" style={{ flex: 1, textAlign: 'center', padding: '14px', background: '#222', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
+              Back
             </a>
             <a 
               href={`/${code}?a=confirm`}
@@ -88,34 +101,33 @@ export default async function RedirectPage({ params, searchParams }) {
               style={{ 
                 flex: 1, 
                 textAlign: 'center', 
-                padding: '16px', 
-                background: '#000', 
-                color: '#fff', 
+                padding: '14px', 
+                background: '#fff', 
+                color: '#000', 
                 borderRadius: '8px', 
                 textDecoration: 'none', 
-                fontSize: '0.95rem', 
+                fontSize: '0.9rem', 
                 fontWeight: '700',
+                border: '1px solid #ddd',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px'
               }}
             >
-              Lanjutkan <span className="material-symbols-rounded" style={{fontSize: '20px'}}>arrow_forward</span>
+              Continue <span className="material-symbols-rounded" style={{fontSize: '18px'}}>arrow_forward</span>
             </a>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#64748b', fontSize: '0.85rem' }}>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <span className="material-symbols-rounded" style={{ color: '#000', fontSize: '20px' }}>lightbulb</span>
-              <p style={{ margin: 0 }}>
-                Jika Anda menerima tautan ini dalam bentuk email atau pesan mencurigakan, mohon tidak melanjutkan.
-              </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#888', fontSize: '0.8rem', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>lightbulb</span>
+              <p style={{ margin: 0 }}>If you received this link via a suspicious message, please double check before continuing.</p>
             </div>
             
-            <a href={reportUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#000', textDecoration: 'none', fontWeight: '700' }}>
-              <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>flag</span>
-              Laporkan Tautan
+            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${data.original_url}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', textDecoration: 'none', fontWeight: '700' }}>
+              <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>flag</span>
+              Report suspicious link
             </a>
           </div>
 
