@@ -13,49 +13,41 @@ export default async function RedirectPage({ params, searchParams }) {
   const userHeaders = headers();
   const hasConfirmed = cookieStore.get(`skip_${code}`);
   
-  // 1. Ambil data dari Supabase
+  // 1. Ambil data link
   const { data } = await supabase.from('links').select('*').eq('slug', code).single();
   if (!data) notFound();
 
-  // FUNGSI HELPER: Wajib pakai AWAIT biar data masuk ke DB sebelum halaman pindah
-  const countClick = async () => {
-    const { error } = await supabase.rpc('increment_clicks', { row_id: data.id });
-    if (error) console.error("Stats Error:", error);
+  // FUNGSI TRACKING - Kita buat sekuat mungkin
+  const track = async () => {
+    await supabase.rpc('increment_clicks', { row_id: data.id });
   };
 
-  // 2. JALUR BOT (Agar Meta Preview Muncul dari URL Tujuan)
+  // 2. JALUR BOT (Jangan dihitung kliknya)
   const userAgent = userHeaders.get('user-agent') || '';
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot/i.test(userAgent);
-  if (isBot) {
-    return redirect(data.original_url);
-  }
+  if (isBot) return redirect(data.original_url);
 
   // 3. JALUR KLIK KEDUA (Sudah ada cookie -> Langsung Redirect)
   if (hasConfirmed) {
-    await countClick(); // Hitung klik otomatis untuk user lama
+    await track(); 
     return redirect(data.original_url);
   }
 
-  // 4. JALUR KLIK PERTAMA - TAHAP REDIRECT URL (Menambahkan ?a=confirm)
+  // 4. JALUR KLIK PERTAMA - Tahap Tampilan (Otomatis ?a=confirm)
   if (!isConfirmAction) {
     return redirect(`/${code}?a=confirm`);
   }
 
-  // 5. JALUR KLIK PERTAMA - TAHAP HITUNG KLIK (Saat tombol Continue diklik)
-  // Ini kunci biar statistik lo gak bocor
+  // 5. JALUR KLIK PERTAMA - Tahap Eksekusi (Setelah user klik Continue)
+  // Logic ini akan jalan saat user balik lagi dengan parameter dan cookie yang baru diset
   if (isConfirmAction && hasConfirmed) {
-     await countClick();
-     return redirect(data.original_url);
+    await track();
+    return redirect(data.original_url);
   }
 
   return (
     <>
       <Header />
-      {/* HISTATS TRACKER */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        // Paste kode Histats lo di sini
-      `}} />
-
       <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
           
@@ -72,10 +64,10 @@ export default async function RedirectPage({ params, searchParams }) {
           </div>
 
           <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#333', marginBottom: '24px' }}>
-            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. <strong>We never ask for your sensitive details.</strong>
+            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding.
           </p>
 
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <a href="/" style={{ flex: 1, textAlign: 'center', padding: '14px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
               Back
             </a>
@@ -90,22 +82,10 @@ export default async function RedirectPage({ params, searchParams }) {
               Continue →
             </a>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#888', fontSize: '0.8rem', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>lightbulb</span>
-              <p style={{ margin: 0 }}>If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding.</p>
-            </div>
-            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', textDecoration: 'none', fontWeight: '700' }}>
-              <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>flag</span>
-              Report suspicious link
-            </a>
-          </div>
         </div>
 
         <script dangerouslySetInnerHTML={{ __html: `
           document.getElementById('finalAction').addEventListener('click', function() {
-            // Pasang cookie agar kunjungan berikutnya langsung redirect
             document.cookie = "skip_${code}=true; max-age=600; path=/";
           });
         `}} />
