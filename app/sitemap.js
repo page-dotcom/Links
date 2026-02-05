@@ -3,7 +3,7 @@ import { siteConfig } from '../lib/config';
 
 export default async function sitemap() {
   // Mengambil domain dari config lo biar gak hardcode
-  const baseUrl = `https://${siteConfig.domain}`;
+  const baseUrl = `https://www.${siteConfig.domain}`;
 
   try {
     // 1. Ambil semua link dari database Supabase
