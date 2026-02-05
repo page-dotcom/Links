@@ -13,6 +13,7 @@ export default function Home() {
   const [recentLinks, setRecentLinks] = useState([]);
   const [showResult, setShowResult] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+  const [error, setError] = useState('');
 
   // FUNGSI COOKIE NATIVE (GAK PERLU NPM)
   const setNativeCookie = (name, value, days) => {
@@ -78,7 +79,38 @@ export default function Home() {
     showToast("Link copied!");
   };
 
-      
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(''); // Reset error setiap kali tombol diklik
+
+  const forbiddenDomains = [
+    'links-omega-blush.vercel.app',
+    'localhost',
+    '127.0.0.1'
+  ];
+
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+
+    // Cek apakah domain dilarang
+    const isForbidden = forbiddenDomains.some(domain => hostname.includes(domain));
+
+    if (isForbidden) {
+      setError("Forbidden: You cannot shorten our own domain or localhost.");
+      return;
+    }
+
+    // Jika aman, lanjut proses simpan ke database...
+    // const { data, error: dbError } = await supabase.from('links')...
+
+  } catch (err) {
+    setError("Please enter a valid URL (include http:// or https://).");
+  }
+};
+
+  
   const openQR = (link) => {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
     window.open(qrUrl, '_blank');
