@@ -80,36 +80,51 @@ export default function Home() {
   };
 
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(''); // Reset error setiap kali tombol diklik
+const processLink = async () => {
+    if (!url.trim()) return showToast("Please fill in the URL!", "error");
+    
+    // 1. VALIDASI DOMAIN (Pencegahan Loop & Localhost)
+    const forbiddenDomains = [
+      'links-omega-blush.vercel.app',
+      'localhost',
+      '127.0.0.1'
+    ];
 
-  const forbiddenDomains = [
-    'links-omega-blush.vercel.app',
-    'localhost',
-    '127.0.0.1'
-  ];
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+      const isForbidden = forbiddenDomains.some(domain => hostname.includes(domain));
 
-  try {
-    const urlObj = new URL(url);
-    const hostname = urlObj.hostname.toLowerCase();
-
-    // Cek apakah domain dilarang
-    const isForbidden = forbiddenDomains.some(domain => hostname.includes(domain));
-
-    if (isForbidden) {
-      setError("Forbidden: You cannot shorten our own domain or localhost.");
-      return;
+      if (isForbidden) {
+        // Panggil showToast dengan type error agar warna merah
+        return showToast("Forbidden: You cannot shorten our own domain or localhost.", "error");
+      }
+    } catch (err) {
+      return showToast("Please enter a valid URL (include http:// or https://)!", "error");
     }
 
-    // Jika aman, lanjut proses simpan ke database...
-    // const { data, error: dbError } = await supabase.from('links')...
+    // 2. JIKA LOLOS VALIDASI, LANJUT PROSES DB
+    setLoading(true);
+    const slug = Math.random().toString(36).substring(2, 8);
+    const fullLink = `${window.location.origin}/${slug}`;
 
-  } catch (err) {
-    setError("Please enter a valid URL (include http:// or https://).");
-  }
-};
+    const { error } = await supabase.from('links').insert([{ original_url: url, slug, clicks: 0 }]);
 
+    if (!error) {
+      setHasil(fullLink);
+      setShowResult(true);
+      const updated = [{ original: url, short: fullLink, slug }, ...recentLinks].slice(0, 5);
+      setRecentLinks(updated);
+      setNativeCookie('recent_links', JSON.stringify(updated), 7);
+      setUrl('');
+      showToast("Link successfully shortened!");
+    } else {
+      showToast("Failed to save to database!", "error");
+    }
+    setLoading(false);
+  };
+
+  
   
   const openQR = (link) => {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
