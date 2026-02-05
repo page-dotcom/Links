@@ -41,8 +41,7 @@ export default function Home() {
 
 
 
-  
-  const processLink = async () => {
+const processLink = async () => {
     if (!url.trim()) return showToast("Please fill in the URL!", "error");
     
     // 1. VALIDASI DOMAIN (Pencegahan Loop & Localhost)
@@ -59,7 +58,6 @@ export default function Home() {
       const isForbidden = forbiddenDomains.some(domain => hostname.includes(domain));
 
       if (isForbidden) {
-        // Panggil showToast dengan type error agar warna merah
         return showToast("Forbidden: You cannot shorten our own domain or localhost.", "error");
       }
     } catch (err) {
@@ -68,8 +66,17 @@ export default function Home() {
 
     // 2. JIKA LOLOS VALIDASI, LANJUT PROSES DB
     setLoading(true);
-    const slug = Math.random().toString(36).substring(2, 8);
-    const fullLink = `${window.location.origin}/${slug}`;
+
+    // BIKIN SLUG RANDOM (CAMPUR HURUF BESAR, KECIL, ANGKA)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let slug = '';
+    for (let i = 0; i < 6; i++) {
+      slug += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // BERSIHKAN WWW DARI ORIGIN
+    const cleanOrigin = window.location.origin.replace("://www.", "://");
+    const fullLink = `${cleanOrigin}/${slug}`;
 
     const { error } = await supabase.from('links').insert([{ original_url: url, slug, clicks: 0 }]);
 
