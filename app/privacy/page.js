@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Header />
-      <main style={{ background: '#ffffff', minHeight: '100vh', padding: '40px 20px' }}>
+      <main style={{ minHeight: '100vh', padding: '40px 20px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', color: '#1f2937' }}>
           
           {/* Judul Utama - Ukuran Normal & Rapi */}
