@@ -29,7 +29,6 @@ export default function Footer() {
               <Link href="/stats">URL Click Counter</Link>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
-              <Link href="/contact">Contact</Link>
             </div>
 
             <div className="social-row">
