@@ -4,87 +4,114 @@ import { siteConfig } from '../../lib/config';
 
 export const metadata = {
   title: `Terms of Service - ${siteConfig.name}`,
-  description: `Please read these terms of service carefully before using ${siteConfig.name} (${siteConfig.domain}).`,
+  description: `Please read these terms of service carefully before using ${siteConfig.name} (${siteConfig.domain}). compliance with terms and conditions.`,
 };
 
 export default function TermsOfService() {
-  const lastUpdated = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const lastUpdated = "February 5, 2026";
 
   return (
     <>
       <Header />
-      <main>
-        <div className="container" style={{ padding: '80px 24px', maxWidth: '800px', margin: '0 auto' }}>
+      <main style={{ minHeight: '100vh', padding: '40px 20px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', color: '#1f2937' }}>
           
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '16px', letterSpacing: '-1px' }}>
+          {/* Header Section */}
+          <div style={{ marginBottom: '40px', borderBottom: '1px solid #f1f5f9', paddingBottom: '24px' }}>
+            <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#111827', marginBottom: '8px', letterSpacing: '-0.03em' }}>
               Terms of Service
             </h1>
-            <p style={{ color: '#64748b', fontSize: '1.1rem' }}>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>
               Effective Date: {lastUpdated}
             </p>
           </div>
 
-          <div style={{ lineHeight: '1.8', color: '#334155', fontSize: '1.05rem' }}>
+          <div style={{ lineHeight: '1.7', fontSize: '1rem', textAlign: 'left' }}>
             
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              1. Acceptance of Terms
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              By accessing and using the services provided by <strong>{siteConfig.name}</strong> at <strong>{siteConfig.domain}</strong>, you agree to be bound by these Terms of Service. If you do not agree to all of these terms, do not use our website or services. These terms apply to all visitors, users, and others who access or use the Service.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                1. Agreement and Acceptance of Terms
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                By accessing and using the URL shortening services provided by <strong>{siteConfig.name}</strong> at <strong>{siteConfig.domain}</strong>, you acknowledge that you have read, understood, and agreed to be legally bound by these Terms of Service. These terms constitute a legally binding agreement between you and the platform operators.
+              </p>
+              <p style={{ marginBottom: '16px' }}>
+                If you do not agree with any part of these terms, you must immediately cease all access to the website and the use of its features. We reserve the right, at our sole discretion, to modify or replace these Terms at any time without prior notice. Continued use of the Service after such modifications signifies your acceptance of the updated terms.
+              </p>
+            </section>
 
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              2. Description of Service
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              <strong>{siteConfig.name}</strong> is a URL shortening service that allows users to create shorter aliases of long URLs. We provide tools to track click analytics and manage these links. We reserve the right to modify or discontinue, temporarily or permanently, the service with or without notice at any time.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                2. Detailed Service Description
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                <strong>{siteConfig.name}</strong> provides a digital toolset designed to transform long, complex Uniform Resource Locators (URLs) into shorter, manageable aliases. Our Service includes, but is not limited to, link redirection, basic click-through analytics, and a local storage-based history feature.
+              </p>
+              <p style={{ marginBottom: '16px' }}>
+                While we strive for 100% uptime, we do not guarantee that the Service will be uninterrupted, timely, secure, or error-free. We reserve the right to modify or discontinue any aspect of the Service, temporarily or permanently, for maintenance, security updates, or policy changes.
+              </p>
+            </section>
 
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              3. Prohibited Conduct and Content
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              You agree not to use <strong>{siteConfig.domain}</strong> for any unlawful purposes or to conduct any unlawful activity. Prohibited activities include, but are not limited to, the creation of links that point to: malware, phishing sites, hate speech, explicit adult content, or any material that violates intellectual property rights.
-            </p>
-            <p style={{ marginBottom: '24px' }}>
-              We reserve the right to remove any shortened link that we determine, in our sole discretion, violates these terms or is otherwise harmful to our service or users. Links that remain inactive for an extended period may also be subject to deletion.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                3. Prohibited Uses and Content Standards
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                Maintaining a safe ecosystem is paramount. You are strictly prohibited from using our platform to facilitate, encourage, or conduct any illegal activity. This includes, but is not limited to, the creation of links that redirect to:
+              </p>
+              <ul style={{ marginBottom: '16px', paddingLeft: '20px' }}>
+                <li style={{ marginBottom: '8px' }}>Malware, ransomware, or any form of malicious software designed to harm user devices.</li>
+                <li style={{ marginBottom: '8px' }}>Phishing, spoofing, or deceptive content intended to steal sensitive user information.</li>
+                <li style={{ marginBottom: '8px' }}>Hate speech, harassment, or content that promotes violence and discrimination.</li>
+                <li style={{ marginBottom: '8px' }}>Explicit adult material or non-consensual imagery.</li>
+                <li style={{ marginBottom: '8px' }}>Any material that infringes upon the intellectual property rights of others.</li>
+              </ul>
+              <p style={{ marginBottom: '16px' }}>
+                We employ automated and manual systems to detect violations. Any link found in breach of these standards will be terminated immediately, and the associated IP address may be blacklisted from further use of our Service.
+              </p>
+            </section>
 
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              4. User History and Cookies
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              For your convenience, <strong>{siteConfig.name}</strong> may store your recent link history in your browser using cookies. This history is stored for a period of seven days. You are responsible for maintaining the privacy of your own browser and session. Clearing your browser cookies will result in the loss of your local link history on our platform.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                4. Cookies, Privacy, and User History
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                To facilitate a seamless user experience without requiring account registration, we utilize browser cookies to store your recent link history for up to seven days. You understand that this data is stored locally on your device and is not synchronized across different browsers or machines.
+              </p>
+              <p style={{ marginBottom: '16px' }}>
+                For detailed information on how we handle your technical data, please refer to our Privacy Policy. By agreeing to these Terms, you also acknowledge the data practices outlined in our Privacy Policy.
+              </p>
+            </section>
 
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              5. Intellectual Property
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              The Service and its original content, features, and functionality are and will remain the exclusive property of <strong>{siteConfig.name}</strong> and its licensors. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of the owners of <strong>{siteConfig.domain}</strong>.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                5. Intellectual Property and Ownership
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                The Service, including its logo, design, source code, and original content, is the exclusive property of <strong>{siteConfig.name}</strong>. You may not reproduce, duplicate, copy, sell, or exploit any portion of the Service without our express written permission.
+              </p>
+            </section>
 
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              6. Limitation of Liability
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              In no event shall <strong>{siteConfig.name}</strong>, nor its directors, employees, or partners, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                6. Limitation of Liability and Indemnification
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                To the maximum extent permitted by applicable law, <strong>{siteConfig.name}</strong> shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the Service. You agree to indemnify and hold us harmless from any claims or demands made by any third party due to or arising out of your violation of these Terms.
+              </p>
+            </section>
 
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              7. Termination
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              We may terminate or suspend your access to our Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. All provisions of the Terms which by their nature should survive termination shall survive termination, including ownership provisions and limitations of liability.
-            </p>
-
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '40px', marginBottom: '20px', color: '#0f172a' }}>
-              8. Contact Us
-            </h2>
-            <p style={{ marginBottom: '24px' }}>
-              If you have any questions about these Terms, please contact us at <strong>legal@{siteConfig.domain}</strong>.
-            </p>
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px', color: '#111827' }}>
+                7. Contact for Legal Matters
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
+                For formal inquiries, legal notices, or reporting abuse, please contact our legal team at:
+              </p>
+              <p style={{ fontWeight: '700', color: '#2563eb', fontSize: '1.1rem' }}>
+                legal@{siteConfig.domain}
+              </p>
+            </section>
 
           </div>
         </div>
