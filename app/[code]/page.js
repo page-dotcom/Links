@@ -6,7 +6,7 @@ import Footer from '../../components/Footer';
 
 export const dynamic = 'force-dynamic';
 
-// FUNGSI UNTUK AMBIL DATA DARI URL TUJUAN (SCRAPING)
+// FUNGSI INI WAJIB ADA BIAR META TAG MUNCUL PAS DISHARE
 export async function generateMetadata({ params }) {
   const { code } = params;
   const { data } = await supabase.from('links').select('original_url').eq('slug', code).single();
@@ -14,28 +14,23 @@ export async function generateMetadata({ params }) {
   if (!data) return { title: "Link Not Found" };
 
   try {
-    const response = await fetch(data.original_url, { next: { revalidate: 3600 } });
-    const html = await response.text();
+    // Kita panggil website tujuan untuk ambil "wajah" aslinya
+    const res = await fetch(data.original_url, { cache: 'no-store' });
+    const html = await res.text();
 
-    // Ambil Title, Description, dan Image asli pakai Regex yang lebih akurat
-    const title = html.match(/<title>(.*?)<\/title>/i)?.[1] || "Redirecting...";
+    // Ambil metadata asli dari sumber (URL Tujuan)
+    const title = html.match(/<title>(.*?)<\/title>/i)?.[1] || "Safe Redirect";
     const desc = html.match(/<meta property="og:description" content="(.*?)"/i)?.[1] || 
-                 html.match(/<meta name="description" content="(.*?)"/i)?.[1] || data.original_url;
-    let img = html.match(/<meta property="og:image" content="(.*?)"/i)?.[1];
-
-    // Pastikan URL gambar lengkap (absolute)
-    if (img && !img.startsWith('http')) {
-      const urlObj = new URL(data.original_url);
-      img = urlObj.origin + (img.startsWith('/') ? '' : '/') + img;
-    }
+                 html.match(/<meta name="description" content="(.*?)"/i)?.[1] || "";
+    const image = html.match(/<meta property="og:image" content="(.*?)"/i)?.[1] || "";
 
     return {
       title: title,
-      description: desc,
+      description: desc, // Ini deskripsi dari URL tujuan, bukan url sumber
       openGraph: {
         title: title,
         description: desc,
-        images: img ? [img] : [],
+        images: image ? [image] : [],
         url: data.original_url,
         type: 'website',
       },
@@ -43,11 +38,11 @@ export async function generateMetadata({ params }) {
         card: 'summary_large_image',
         title: title,
         description: desc,
-        images: img ? [img] : [],
+        images: image ? [image] : [],
       },
     };
   } catch (e) {
-    return { title: "Secure Redirect", description: data.original_url };
+    return { title: "Secure Redirect" };
   }
 }
 
@@ -71,32 +66,31 @@ export default async function RedirectPage({ params, searchParams }) {
       <main style={{ background: '#ffffff', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
           
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '16px', color: '#000', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
             You are being redirected to:
           </h2>
 
-          {/* Box URL - Style Dark Minimalist */}
           <div style={{ 
             background: '#111', 
-            padding: '18px', 
+            padding: '16px', 
             borderRadius: '8px', 
             fontFamily: 'monospace', 
             fontSize: '0.85rem', 
             color: '#fff',
             wordBreak: 'break-all',
-            marginBottom: '24px',
-            lineHeight: '1.5',
+            marginBottom: '20px',
+            lineHeight: '1.4',
             border: '1px solid #333'
           }}>
             {data.original_url}
           </div>
 
-          <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
+          <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#333', marginBottom: '24px' }}>
             This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. <strong>We never ask for your sensitive details.</strong>
           </p>
 
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-            <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
+            <a href="/" style={{ flex: 1, textAlign: 'center', padding: '14px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
               Back
             </a>
             <a 
@@ -105,7 +99,7 @@ export default async function RedirectPage({ params, searchParams }) {
               style={{ 
                 flex: 1, 
                 textAlign: 'center', 
-                padding: '16px', 
+                padding: '14px', 
                 background: '#000', 
                 color: '#fff', 
                 borderRadius: '8px', 
@@ -118,18 +112,18 @@ export default async function RedirectPage({ params, searchParams }) {
                 gap: '8px'
               }}
             >
-              Continue <span className="material-symbols-rounded" style={{fontSize: '20px'}}>arrow_forward</span>
+              Continue →
             </a>
           </div>
 
-          <div style={{ borderTop: '1px solid #eee', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', color: '#666', fontSize: '0.85rem' }}>
-              <span className="material-symbols-rounded" style={{ fontSize: '20px', color: '#000' }}>lightbulb</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#888', fontSize: '0.8rem', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>lightbulb</span>
               <p style={{ margin: 0 }}>If you received this link via a suspicious message, please double check before continuing.</p>
             </div>
             
-            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#000', textDecoration: 'none', fontWeight: '700', fontSize: '0.85rem' }}>
-              <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>flag</span>
+            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${data.original_url}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', textDecoration: 'none', fontWeight: '700' }}>
+              <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>flag</span>
               Report suspicious link
             </a>
           </div>
