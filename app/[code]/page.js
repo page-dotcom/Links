@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { siteConfig } from '../../lib/config';
 import { redirect, notFound } from 'next/navigation';
 import { cookies, headers } from 'next/headers';
 import Header from '../../components/Header';
@@ -56,6 +57,14 @@ export default async function RedirectPage({ params, searchParams }) {
             {data.original_url}
           </div>
 
+
+            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
+             This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
+             </p>
+
+
+
+            
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
             <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
               Back
