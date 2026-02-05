@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 export default function RegisterRedirect() {
   // Ganti link di bawah ini dengan link referral/shorten url target lo
-  const targetUrl = "https://suclt.eu.org/RefUser";
+  const targetUrl = "https://t.ly/register?via=brandy";
 
   // Langsung lempar user ke target pas halaman diakses
   redirect(targetUrl);
