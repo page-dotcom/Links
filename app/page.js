@@ -107,7 +107,7 @@ export default function Home() {
                       />
                       <button className="btn-black" onClick={processLink} disabled={loading}>
                           {loading ? '...' : 'Shorten'}
-                          <span className="material-symbols-rounded">arrow_forward</span>
+                          <span className="material-symbols-rounded notranslate" translate="no">arrow_forward</span>
                       </button>
                   </div>
                 ) : (
@@ -118,7 +118,7 @@ export default function Home() {
                           Copy Link
                       </button>
                       <button className="btn-icon" onClick={() => setShowResult(false)} title="Reset">
-                          <span className="material-symbols-rounded">refresh</span>
+                          <span className="material-symbols-rounded notranslate" translate="no">refresh</span>
                       </button>
                   </div>
                 )}
@@ -139,16 +139,16 @@ export default function Home() {
                             </div>
                             <div className="actions">
                                 <button className="btn-icon" title="Copy" onClick={() => copyResult(item.short)}>
-                                    <span className="material-symbols-rounded">content_copy</span>
+                                    <span className="material-symbols-rounded notranslate" translate="no">content_copy</span>
                                 </button>
                                 <button className="btn-icon" title="QR Code" onClick={() => openQR(item.short)}>
-                                    <span className="material-symbols-rounded">qr_code_2</span>
+                                    <span className="material-symbols-rounded notranslate" translate="no">qr_code_2</span>
                                 </button>
                                 <Link href={`/stats?slug=${item.slug}`} className="btn-icon" title="Analytics">
-                                    <span className="material-symbols-rounded">bar_chart</span>
+                                    <span className="material-symbols-rounded notranslate" translate="no">bar_chart</span>
                                 </Link>
                                 <button className="btn-icon" title="Delete" onClick={() => deleteSingle(index)} style={{color: 'red'}}>
-                                    <span className="material-symbols-rounded">delete</span>
+                                    <span className="material-symbols-rounded notranslate" translate="no">delete</span>
                                 </button>
                             </div>
                         </div>
