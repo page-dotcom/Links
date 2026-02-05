@@ -6,6 +6,33 @@ import Footer from '../../components/Footer';
 
 export const dynamic = 'force-dynamic';
 
+// FUNGSI UNTUK CLONE METADATA DARI URL TUJUAN
+export async function generateMetadata({ params }) {
+  const { code } = params;
+  const { data } = await supabase.from('links').select('original_url').eq('slug', code).single();
+  
+  if (!data) return { title: "Link Not Found" };
+
+  try {
+    // Kita kasih instruksi ke bot biar "seolah-olah" ini adalah web aslinya
+    return {
+      title: "Redirecting...", 
+      description: "You are being redirected to an external link.",
+      openGraph: {
+        title: "Link Redirecting...",
+        description: data.original_url,
+        url: data.original_url,
+      },
+      // Trick: Kadang bot butuh metadata manual kalau scraping berat
+      other: {
+        "og:url": data.original_url,
+      }
+    };
+  } catch (e) {
+    return { title: "Secure Redirect" };
+  }
+}
+
 export default async function RedirectPage({ params, searchParams }) {
   const { code } = params;
   const isConfirmAction = searchParams.a === 'confirm';
@@ -25,47 +52,34 @@ export default async function RedirectPage({ params, searchParams }) {
   return (
     <>
       <Header />
-      <main style={{ background: '#000', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ maxWidth: '550px', width: '100%', color: '#fff' }}>
+      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+        <div style={{ maxWidth: '500px', width: '100%' }}>
           
-          {/* Judul Utama */}
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
             Anda akan dialihkan ke:
           </h2>
 
-          {/* Box URL - Gelap & Tajam */}
           <div style={{ 
-            background: '#1a1a1a', 
+            background: '#111', 
             padding: '20px', 
             borderRadius: '8px', 
             fontFamily: 'monospace', 
-            fontSize: '1rem', 
+            fontSize: '0.9rem', 
             color: '#fff',
             wordBreak: 'break-all',
             marginBottom: '24px',
+            lineHeight: '1.5',
             border: '1px solid #333'
           }}>
             {data.original_url}
           </div>
 
-          {/* Teks Deskripsi Sesuai Contoh */}
-          <p style={{ fontSize: '1rem', lineHeight: '1.6', color: '#fff', marginBottom: '32px' }}>
+          <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
             Tautan ini dibuat oleh <strong>pengguna publik</strong>. Silakan periksa tautan di atas sebelum melanjutkan. <strong>Kami tidak pernah menanyakan informasi detail anda.</strong>
           </p>
 
-          {/* Tombol Aksi */}
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
-            <a href="/" style={{ 
-              flex: 1, 
-              textAlign: 'center', 
-              padding: '18px', 
-              background: '#222', 
-              color: '#fff', 
-              borderRadius: '8px', 
-              textDecoration: 'none', 
-              fontSize: '1rem', 
-              fontWeight: '700' 
-            }}>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
+            <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '700' }}>
               Kembali
             </a>
             <a 
@@ -74,12 +88,12 @@ export default async function RedirectPage({ params, searchParams }) {
               style={{ 
                 flex: 1, 
                 textAlign: 'center', 
-                padding: '18px', 
-                background: '#fff', 
-                color: '#000', 
+                padding: '16px', 
+                background: '#000', 
+                color: '#fff', 
                 borderRadius: '8px', 
                 textDecoration: 'none', 
-                fontSize: '1rem', 
+                fontSize: '0.95rem', 
                 fontWeight: '700',
                 display: 'flex',
                 alignItems: 'center',
@@ -87,33 +101,26 @@ export default async function RedirectPage({ params, searchParams }) {
                 gap: '8px'
               }}
             >
-              Lanjutkan <span className="material-symbols-rounded">arrow_forward</span>
+              Lanjutkan <span className="material-symbols-rounded" style={{fontSize: '20px'}}>arrow_forward</span>
             </a>
           </div>
 
-          {/* Footer Info & Report */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#999', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>lightbulb</span>
-              <p>Jika Anda menerima tautan ini dalam bentuk email, panggilan telepon, atau pesan mencurigakan lainnya. Mohon memeriksa kembali atau tidak untuk melanjutkan. Laporkan tautan jika menurut Anda tautan ini mencurigakan.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#64748b', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <span className="material-symbols-rounded" style={{ color: '#000', fontSize: '20px' }}>lightbulb</span>
+              <p style={{ margin: 0 }}>
+                Jika Anda menerima tautan ini dalam bentuk email atau pesan mencurigakan, mohon tidak melanjutkan.
+              </p>
             </div>
             
-            <a href={reportUrl} target="_blank" rel="noopener noreferrer" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              color: '#999', 
-              textDecoration: 'none',
-              fontWeight: '600'
-            }}>
-              <span className="material-symbols-rounded">flag</span>
-              Laporkan Tautan jika mencurigakan
+            <a href={reportUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#000', textDecoration: 'none', fontWeight: '700' }}>
+              <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>flag</span>
+              Laporkan Tautan
             </a>
           </div>
 
         </div>
 
-        {/* Script Logic URL & Cookie */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             const url = new URL(window.location);
