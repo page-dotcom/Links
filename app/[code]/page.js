@@ -1,53 +1,35 @@
-"use client"; // Wajib Client Side biar bisa 'useEffect'
-import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import { siteConfig } from '../../lib/config';
+import { redirect, notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
-export default function RedirectPage({ params }) {
+// PENTING: Paksa server render ulang tiap akses biar tracking jalan
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function RedirectPage({ params }) {
   const { code } = params;
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const hasCounted = useRef(false); // Penjaga biar gak ngitung dobel
+  const userHeaders = headers();
+  
+  // 1. AMBIL DATA DARI SUPABASE
+  const { data } = await supabase.from('links').select('*').eq('slug', code).single();
+  if (!data) notFound();
 
-  useEffect(() => {
-    async function init() {
-      // 1. Ambil data link
-      const { data: linkData, error } = await supabase
-        .from('links')
-        .select('*')
-        .eq('slug', code)
-        .single();
+  // 2. DETEKSI BOT SOSMED (WA, FB, IG, Twitter, dll)
+  // Ini SOLUSI PREVIEW: Kalo bot, lempar langsung ke tujuan biar dia ambil gambar dari sana
+  const userAgent = userHeaders.get('user-agent') || '';
+  const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot|linkedinbot|embedly|slackbot|discordbot/i.test(userAgent);
 
-      if (error || !linkData) {
-        window.location.href = '/'; // Kalo link gak ada, balik home
-        return;
-      }
-      
-      setData(linkData);
-      setLoading(false);
+  if (isBot) {
+    return redirect(data.original_url);
+  }
 
-      // 2. HITUNG PENGUNJUNG OTOMATIS (Tanpa Klik Tombol)
-      // Begitu halaman loading selesai, langsung tembak database
-      if (!hasCounted.current) {
-        hasCounted.current = true;
-        await supabase.rpc('increment_clicks', { row_id: linkData.id });
-      }
-    }
+  // 3. TRACKING KLIK (MANUSIA)
+  // Langsung hitung klik begitu halaman dibuka manusia. Gak perlu nunggu tombol diklik.
+  await supabase.rpc('increment_clicks', { row_id: data.id });
 
-    init();
-  }, [code]);
-
-  // Fungsi Tombol Continue (Cuma buat redirect, gak usah ngitung lagi)
-  const handleContinue = () => {
-    if (data) {
-      window.location.href = data.original_url;
-    }
-  };
-
-  if (loading) return <div style={{ minHeight: '100vh', background: '#fff' }}></div>;
-
+  // 4. TAMPILKAN HALAMAN KONFIRMASI (LANGSUNG, TANPA REDIRECT URL)
   return (
     <>
       <Header />
@@ -66,11 +48,11 @@ export default function RedirectPage({ params }) {
             wordBreak: 'break-all', marginBottom: '24px', border: '1px solid #333',
             lineHeight: '1.5'
           }}>
-            {data?.original_url}
+            {data.original_url}
           </div>
 
           <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-          This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
+            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. <strong>We never ask for your sensitive details.</strong>
           </p>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
@@ -78,17 +60,22 @@ export default function RedirectPage({ params }) {
               Back
             </a>
             
-            {/* Tombol Continue Langsung Jalan */}
-            <button 
-              onClick={handleContinue}
+            {/* TOMBOL CONTINUE: Pake JavaScript Inline biar pasti jalan */}
+            <a 
+              href={data.original_url}
+              onClick={`(function(e){ 
+                e.preventDefault(); 
+                // Langsung ganti halaman ke tujuan
+                window.location.replace("${data.original_url}"); 
+              })(event)`}
               style={{ 
-                flex: 1, padding: '16px', background: '#000', color: '#fff', 
-                borderRadius: '8px', border: 'none', fontSize: '0.9rem', fontWeight: '700',
+                flex: 1, textAlign: 'center', padding: '16px', background: '#000', color: '#fff', 
+                borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer'
               }}
             >
               Continue <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '20px' }}>arrow_forward</span>
-            </button>
+            </a>
           </div>
 
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -98,12 +85,14 @@ export default function RedirectPage({ params }) {
                 If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding. Report the link if you think it's suspicious.
               </p>
             </div>
-            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data?.original_url)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#000', textDecoration: 'none', fontWeight: '700', fontSize: '0.9rem' }}>
+            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#000', textDecoration: 'none', fontWeight: '700', fontSize: '0.9rem' }}>
               <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '22px' }}>flag</span>
               Report suspicious link
             </a>
           </div>
         </div>
+        
+        {/* Hapus script addEventListener yang bikin error */}
       </main>
       <Footer />
     </>
