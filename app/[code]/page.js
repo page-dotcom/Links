@@ -42,7 +42,7 @@ export default async function RedirectPage({ params }) {
           </h2>
 
           <div style={{ 
-            background: '#111', padding: '18px', borderRadius: '8px', 
+            background: '#f1f5f9', padding: '18px', borderRadius: '8px', 
             marginBottom: '24px', border: '1px solid #333',
             lineHeight: '1.5', wordBreak: 'break-all'
           }}>
