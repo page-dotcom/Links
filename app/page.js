@@ -39,48 +39,10 @@ export default function Home() {
     setTimeout(() => setToast({ show: false, msg: '', type: '' }), 3000);
   };
 
+
+
+  
   const processLink = async () => {
-    if (!url.trim()) return showToast("Please fill in the URL!", "error");
-    setLoading(true);
-    const slug = Math.random().toString(36).substring(2, 8);
-    const fullLink = `${window.location.origin}/${slug}`;
-
-    const { error } = await supabase.from('links').insert([{ original_url: url, slug, clicks: 0 }]);
-
-    if (!error) {
-      setHasil(fullLink);
-      setShowResult(true);
-      const updated = [{ original: url, short: fullLink, slug }, ...recentLinks].slice(0, 5);
-      setRecentLinks(updated);
-      setNativeCookie('recent_links', JSON.stringify(updated), 7);
-      setUrl('');
-      showToast("Link successfully shortened!");
-    } else {
-      showToast("Failed to save to database!", "error");
-    }
-    setLoading(false);
-  };
-
-  const deleteSingle = (index) => {
-    const updated = recentLinks.filter((_, i) => i !== index);
-    setRecentLinks(updated);
-    setNativeCookie('recent_links', JSON.stringify(updated), 7);
-    showToast("History deleted");
-  };
-
-  const clearAll = () => {
-    document.cookie = "recent_links=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    setRecentLinks([]);
-    showToast("All history cleared");
-  };
-
-  const copyResult = (text) => {
-    navigator.clipboard.writeText(text);
-    showToast("Link copied!");
-  };
-
-
-const processLink = async () => {
     if (!url.trim()) return showToast("Please fill in the URL!", "error");
     
     // 1. VALIDASI DOMAIN (Pencegahan Loop & Localhost)
@@ -123,6 +85,30 @@ const processLink = async () => {
     }
     setLoading(false);
   };
+
+
+    
+
+  const deleteSingle = (index) => {
+    const updated = recentLinks.filter((_, i) => i !== index);
+    setRecentLinks(updated);
+    setNativeCookie('recent_links', JSON.stringify(updated), 7);
+    showToast("History deleted");
+  };
+
+  const clearAll = () => {
+    document.cookie = "recent_links=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setRecentLinks([]);
+    showToast("All history cleared");
+  };
+
+  const copyResult = (text) => {
+    navigator.clipboard.writeText(text);
+    showToast("Link copied!");
+  };
+
+
+
 
   
   
