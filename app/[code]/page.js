@@ -5,7 +5,9 @@ import { cookies, headers } from 'next/headers';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
+// PAKSA TOTAL: Jangan ada cache sama sekali
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function RedirectPage({ params, searchParams }) {
   const { code } = params;
@@ -18,22 +20,21 @@ export default async function RedirectPage({ params, searchParams }) {
   const { data } = await supabase.from('links').select('*').eq('slug', code).single();
   if (!data) notFound();
 
-  // 2. DETEKSI BOT SOSIAL MEDIA (WA, FB, Telegram, dll)
+  // 2. DETEKSI BOT SOSIAL MEDIA (Penting buat Preview Meta Tag)
   const userAgent = userHeaders.get('user-agent') || '';
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot|linkedinbot|embedly/i.test(userAgent);
 
-  // JIKA BOT: Langsung lempar ke URL asli (Ini yang jamin Preview muncul)
   if (isBot) {
     return redirect(data.original_url);
   }
 
-  // 3. JIKA MANUSIA SUDAH KONFIRMASI (Cookie ada)
+  // 3. LOGIC REDIRECT SERVER (Jika cookie terbaca)
   if (hasConfirmed) {
     await supabase.rpc('increment_clicks', { row_id: data.id });
     return redirect(data.original_url);
   }
 
-  // 4. JIKA MANUSIA BELUM KONFIRMASI: Paksa ke halaman confirm
+  // 4. JIKA BELUM KONFIRMASI: Paksa ke halaman confirm
   if (!isConfirmAction) {
     return redirect(`/${code}?a=confirm`);
   }
@@ -43,9 +44,16 @@ export default async function RedirectPage({ params, searchParams }) {
       <Header />
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
       
+      {/* 5. LOGIC REDIRECT CLIENT (BACKUP): Jika server telat baca cookie, JS ini yang nendang langsung */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        if (document.cookie.includes("skip_${code}=true")) {
+          window.location.replace("${data.original_url}");
+        }
+      `}} />
+
       <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '16px', color: '#000', letterSpacing: '-0.02em' }}>
             You are being redirected to:
           </h2>
 
@@ -57,14 +65,10 @@ export default async function RedirectPage({ params, searchParams }) {
             {data.original_url}
           </div>
 
+          <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
+            This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
+          </p>
 
-            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-             This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
-             </p>
-
-
-
-            
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
             <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
               Back
@@ -82,7 +86,6 @@ export default async function RedirectPage({ params, searchParams }) {
             </a>
           </div>
 
-          {/* AREA REPORT */}
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', color: '#64748b', fontSize: '0.85rem' }}>
               <span className="material-symbols-rounded notranslate" translate="no" style={{ color: '#000', fontSize: '22px' }}>lightbulb</span>
@@ -95,10 +98,13 @@ export default async function RedirectPage({ params, searchParams }) {
           </div>
         </div>
 
+        {/* 6. ACTION SCRIPT: Masang cookie dan redirect pas tombol diklik */}
         <script dangerouslySetInnerHTML={{ __html: `
           document.getElementById('finalAction').addEventListener('click', function(e) {
             e.preventDefault();
+            // Pasang cookie dengan path root
             document.cookie = "skip_${code}=true; max-age=3600; path=/";
+            // Langsung ganti halaman
             window.location.replace("${data.original_url}");
           });
         `}} />
