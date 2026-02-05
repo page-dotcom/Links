@@ -20,52 +20,53 @@ export default async function RedirectPage({ params, searchParams }) {
     redirect(data.original_url);
   }
 
+  const reportUrl = `https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`;
+
   return (
     <>
       <Header />
-      <main style={{ background: '#ffffff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div style={{ maxWidth: '500px', width: '100%', textAlign: 'left' }}>
+      <main style={{ background: '#000', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: '550px', width: '100%', color: '#fff' }}>
           
-          {/* Judul Kecil & Rapi */}
-          <h2 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
-            You are being redirected to:
+          {/* Judul Utama */}
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '16px' }}>
+            Anda akan dialihkan ke:
           </h2>
 
-          {/* Box URL Minimalis - Tidak Terlalu Bulat */}
+          {/* Box URL - Gelap & Tajam */}
           <div style={{ 
-            background: '#111', 
-            padding: '16px', 
+            background: '#1a1a1a', 
+            padding: '20px', 
             borderRadius: '8px', 
             fontFamily: 'monospace', 
-            fontSize: '0.85rem', 
+            fontSize: '1rem', 
             color: '#fff',
             wordBreak: 'break-all',
-            marginBottom: '20px',
-            lineHeight: '1.4',
+            marginBottom: '24px',
             border: '1px solid #333'
           }}>
             {data.original_url}
           </div>
 
-          {/* Teks Deskripsi - Ukuran Font Standar agar tidak tumpang tindih */}
-          <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: '#333', marginBottom: '24px' }}>
-            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. We never ask for your sensitive details.
+          {/* Teks Deskripsi Sesuai Contoh */}
+          <p style={{ fontSize: '1rem', lineHeight: '1.6', color: '#fff', marginBottom: '32px' }}>
+            Tautan ini dibuat oleh <strong>pengguna publik</strong>. Silakan periksa tautan di atas sebelum melanjutkan. <strong>Kami tidak pernah menanyakan informasi detail anda.</strong>
           </p>
 
-          {/* Tombol Aksi - Rapi & Sejajar */}
-          <div style={{ display: 'flex', gap: '12px' }}>
+          {/* Tombol Aksi */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
             <a href="/" style={{ 
               flex: 1, 
               textAlign: 'center', 
-              padding: '14px', 
+              padding: '18px', 
               background: '#222', 
               color: '#fff', 
               borderRadius: '8px', 
               textDecoration: 'none', 
-              fontSize: '0.9rem', 
+              fontSize: '1rem', 
               fontWeight: '700' 
             }}>
-              Back
+              Kembali
             </a>
             <a 
               href={`/${code}?a=confirm`}
@@ -73,34 +74,46 @@ export default async function RedirectPage({ params, searchParams }) {
               style={{ 
                 flex: 1, 
                 textAlign: 'center', 
-                padding: '14px', 
+                padding: '18px', 
                 background: '#fff', 
                 color: '#000', 
                 borderRadius: '8px', 
                 textDecoration: 'none', 
-                fontSize: '0.9rem', 
+                fontSize: '1rem', 
                 fontWeight: '700',
-                border: '1px solid #ddd',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px'
               }}
             >
-              Continue <span style={{fontSize: '18px'}}>→</span>
+              Lanjutkan <span className="material-symbols-rounded">arrow_forward</span>
             </a>
           </div>
 
-          {/* Footer Info Kecil */}
-          <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid #eee' }}>
-            <p style={{ fontSize: '0.75rem', color: '#888', lineHeight: '1.4' }}>
-              💡 If you received this link via suspicious email or message, please double check before continuing. Report this link if you find it suspicious.
-            </p>
+          {/* Footer Info & Report */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#999', fontSize: '0.95rem', lineHeight: '1.5' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>lightbulb</span>
+              <p>Jika Anda menerima tautan ini dalam bentuk email, panggilan telepon, atau pesan mencurigakan lainnya. Mohon memeriksa kembali atau tidak untuk melanjutkan. Laporkan tautan jika menurut Anda tautan ini mencurigakan.</p>
+            </div>
+            
+            <a href={reportUrl} target="_blank" rel="noopener noreferrer" style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              color: '#999', 
+              textDecoration: 'none',
+              fontWeight: '600'
+            }}>
+              <span className="material-symbols-rounded">flag</span>
+              Laporkan Tautan jika mencurigakan
+            </a>
           </div>
 
         </div>
 
-        {/* Script Otomatis URL & Cookie 10 Menit */}
+        {/* Script Logic URL & Cookie */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             const url = new URL(window.location);
