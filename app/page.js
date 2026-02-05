@@ -78,6 +78,37 @@ export default function Home() {
     showToast("Link copied!");
   };
 
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Daftar domain yang dilarang (Blacklist)
+  const forbiddenDomains = [
+    'links-omega-blush.vercel.app',
+    'localhost',
+    '127.0.0.1'
+  ];
+
+  try {
+    const urlObj = new URL(url); // 'url' adalah state dari input user
+    const hostname = urlObj.hostname.toLowerCase();
+
+    // Cek apakah hostname mengandung salah satu domain terlarang
+    const isForbidden = forbiddenDomains.some(domain => hostname.includes(domain));
+
+    if (isForbidden) {
+      alert("Waduh! Domain ini tidak boleh dipendekkan karena ini adalah domain layanan kami sendiri.");
+      return; // Stop proses simpan ke database
+    }
+
+    // ... lanjutkan proses simpan ke Supabase seperti biasa ...
+    
+  } catch (err) {
+    alert("Masukkan URL yang valid ya, Bos!");
+  }
+};
+
+  
+      
   const openQR = (link) => {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
     window.open(qrUrl, '_blank');
