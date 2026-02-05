@@ -18,7 +18,6 @@ export default async function RedirectPage({ params }) {
   if (!data) notFound();
 
   // 2. DETEKSI BOT SOSMED (WA, FB, dll)
-  // Ini biar PREVIEW LINK ASLI MUNCUL. Bot langsung dilempar, gak dihitung kliknya (opsional).
   const userAgent = userHeaders.get('user-agent') || '';
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot|linkedinbot|embedly|slackbot|discordbot/i.test(userAgent);
 
@@ -26,9 +25,7 @@ export default async function RedirectPage({ params }) {
     return redirect(data.original_url);
   }
 
-  // 3. TRACKING KLIK (HANYA DISINI!)
-  // Klik dihitung SAAT HALAMAN DIMUAT.
-  // Tidak ada tracking lagi di tombol continue. Jadi total = 1.
+  // 3. TRACKING KLIK (HANYA DISINI - SERVER SIDE)
   await supabase.rpc('increment_clicks', { row_id: data.id });
 
   // 4. TAMPILKAN HALAMAN KONFIRMASI
@@ -46,15 +43,21 @@ export default async function RedirectPage({ params }) {
 
           <div style={{ 
             background: '#111', padding: '18px', borderRadius: '8px', 
-            fontFamily: 'monospace', fontSize: '0.9rem', color: '#fff',
-            wordBreak: 'break-all', marginBottom: '24px', border: '1px solid #333',
-            lineHeight: '1.5'
+            marginBottom: '24px', border: '1px solid #333',
+            lineHeight: '1.5', wordBreak: 'break-all'
           }}>
-            {data.original_url}
+            {/* Link biru dan bisa diklik sesuai request */}
+            <a 
+              href={data.original_url} 
+              style={{ color: '#3b82f6', textDecoration: 'underline', fontFamily: 'monospace', fontSize: '0.9rem' }}
+            >
+              {data.original_url}
+            </a>
           </div>
 
+          {/* TEKS INI SUDAH DIKEMBALIKAN SESUAI SNIPPET LO */}
           <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-          This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
+             This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
           </p>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
@@ -62,14 +65,12 @@ export default async function RedirectPage({ params }) {
               Back
             </a>
             
-            {/* TOMBOL CONTINUE MURNI */}
-            {/* Perhatikan: Gak ada logic supabase/tracking disini. Cuma murni pindah halaman. */}
+            {/* TOMBOL CONTINUE */}
             <a 
               href={data.original_url}
               onClick={`(function(e){ 
                 e.preventDefault(); 
-                // Langsung ganti halaman ke tujuan TANPA lapor database lagi
-                window.location.replace("${data.original_url}"); 
+                window.location.replace(e.currentTarget.href); 
               })(event)`}
               style={{ 
                 flex: 1, textAlign: 'center', padding: '16px', background: '#000', color: '#fff', 
