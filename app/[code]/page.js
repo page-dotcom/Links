@@ -77,7 +77,7 @@ export default async function RedirectPage({ params, searchParams }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
               }}
             >
-              Continue <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>arrow_forward</span>
+              Continue <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '20px' }}>arrow_forward</span>
             </a>
           </div>
 
@@ -85,7 +85,7 @@ export default async function RedirectPage({ params, searchParams }) {
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', color: '#64748b', fontSize: '0.85rem', lineHeight: '1.5' }}>
-              <span className="material-symbols-rounded" style={{ color: '#000', fontSize: '22px' }}>lightbulb</span>
+              <span className="material-symbols-rounded notranslate" translate="no" style={{ color: '#000', fontSize: '22px' }}>lightbulb</span>
               <p style={{ margin: 0 }}>
                 If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding. Report the link if you think it's suspicious.
               </p>
@@ -105,7 +105,7 @@ export default async function RedirectPage({ params, searchParams }) {
                 fontSize: '0.9rem' 
               }}
             >
-              <span className="material-symbols-rounded" style={{ fontSize: '22px' }}>flag</span>
+              <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '22px' }}>flag</span>
               Report suspicious link
             </a>
 
