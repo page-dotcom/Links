@@ -112,7 +112,7 @@ export default function Home() {
                   </div>
                 ) : (
                   <div id="state-result" className="result-box" style={{display: 'flex'}}>
-                      <span className="material-symbols-rounded" style={{color:'var(--accent)'}}>check_circle</span>
+                      <span className="material-symbols-rounded notranslate" translate="no" style={{color:'var(--accent)'}}>check_circle</span>
                       <span id="finalLink" className="result-text">{hasil}</span>
                       <button className="btn-black copy" style={{background:'var(--accent)'}} onClick={() => copyResult(hasil)}>
                           Copy Link
