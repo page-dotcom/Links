@@ -17,28 +17,39 @@ export default async function RedirectPage({ params, searchParams }) {
   const { data } = await supabase.from('links').select('*').eq('slug', code).single();
   if (!data) notFound();
 
-  // 2. DETEKSI BOT (Hanya untuk Meta Preview)
+  // FUNGSI HELPER: Biar hitung klik nggak kelewat
+  const countClick = async () => {
+    await supabase.rpc('increment_clicks', { row_id: data.id });
+  };
+
+  // 2. JALUR BOT (Agar Meta Preview Muncul)
   const userAgent = userHeaders.get('user-agent') || '';
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot/i.test(userAgent);
   if (isBot) {
+    // Bot nggak perlu dihitung kliknya biar statistik lo asli manusia
     return redirect(data.original_url);
   }
 
-  // 3. LOGIKA KLIK KEDUA (Sudah ada cookie -> Langsung Redirect)
+  // 3. JALUR KLIK KEDUA (Cookie aktif -> Langsung Redirect)
   if (hasConfirmed) {
-    await supabase.rpc('increment_clicks', { row_id: data.id });
+    await countClick(); // Hitung klik dulu sebelum kabur
     return redirect(data.original_url);
   }
 
-  // 4. LOGIKA KLIK PERTAMA (Belum ada ?a=confirm -> Paksa tambahkan ke URL)
+  // 4. JALUR KLIK PERTAMA (Belum ada ?a=confirm -> Paksa pindah URL)
   if (!isConfirmAction) {
     return redirect(`/${code}?a=confirm`);
   }
 
-  // 5. TAMPILAN HALAMAN KONFIRMASI (Jika URL sudah ada ?a=confirm)
+  // 5. TAMPILAN HALAMAN KONFIRMASI (User beneran mampir di sini)
   return (
     <>
       <Header />
+      {/* HISTATS TRACKER - Pasang di sini agar kunjungan halaman konfirmasi terhitung */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        // Masukkan kode Histats lo di sini kalau mau tracking halaman jembatan
+      `}} />
+
       <main style={{  minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
           
@@ -75,9 +86,9 @@ export default async function RedirectPage({ params, searchParams }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#888', fontSize: '0.8rem', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>lightbulb</span>
-              <p style={{ margin: 0 }}>If you received this link via a suspicious message, please double check before continuing.</p>
+              <p style={{ margin: 0 }}>If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding. Report the link if you think it's suspicious.</p>
             </div>
             <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', textDecoration: 'none', fontWeight: '700' }}>
               <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>flag</span>
@@ -86,7 +97,6 @@ export default async function RedirectPage({ params, searchParams }) {
           </div>
         </div>
 
-        {/* Script untuk pasang cookie saat tombol diklik */}
         <script dangerouslySetInnerHTML={{ __html: `
           document.getElementById('finalAction').addEventListener('click', function() {
             // Pasang cookie agar kunjungan berikutnya langsung redirect
