@@ -24,24 +24,20 @@ export default async function RedirectPage({ params, searchParams }) {
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot/i.test(userAgent);
   if (isBot) return redirect(data.original_url);
 
+  // Jika sudah ada cookie, langsung catat klik dan redirect
   if (hasConfirmed) {
     await track(); 
     return redirect(data.original_url);
   }
 
+  // Jika belum di halaman confirm, arahkan ke sana
   if (!isConfirmAction) {
     return redirect(`/${code}?a=confirm`);
-  }
-
-  if (isConfirmAction && hasConfirmed) {
-    await track();
-    return redirect(data.original_url);
   }
 
   return (
     <>
       <Header />
-      {/* Import Google Icon Font */}
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
       
       <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
@@ -68,8 +64,9 @@ export default async function RedirectPage({ params, searchParams }) {
             <a href="/" style={{ flex: 1, textAlign: 'center', padding: '16px', background: '#f1f5f9', color: '#000', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700' }}>
               Back
             </a>
+            {/* PERBAIKAN: href diubah ke URL asli, tapi dicegat oleh JS di bawah */}
             <a 
-              href={`/${code}?a=confirm`}
+              href={data.original_url}
               id="finalAction"
               style={{ 
                 flex: 1, textAlign: 'center', padding: '16px', background: '#000', color: '#fff', 
@@ -81,13 +78,11 @@ export default async function RedirectPage({ params, searchParams }) {
             </a>
           </div>
 
-          {/* AREA REPORT & INFO - Rapi & Presisi */}
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', color: '#64748b', fontSize: '0.85rem', lineHeight: '1.5' }}>
               <span className="material-symbols-rounded notranslate" translate="no" style={{ color: '#000', fontSize: '22px' }}>lightbulb</span>
               <p style={{ margin: 0 }}>
-                If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding. Report the link if you think it's suspicious.
+                If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding.
               </p>
             </div>
 
@@ -96,25 +91,21 @@ export default async function RedirectPage({ params, searchParams }) {
               target="_blank" 
               rel="noopener noreferrer"
               style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '10px', 
-                color: '#000', 
-                textDecoration: 'none', 
-                fontWeight: '700', 
-                fontSize: '0.9rem' 
+                display: 'flex', alignItems: 'center', gap: '10px', color: '#000', textDecoration: 'none', fontWeight: '700', fontSize: '0.9rem' 
               }}
             >
               <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '22px' }}>flag</span>
               Report suspicious link
             </a>
-
           </div>
         </div>
 
+        {/* PERBAIKAN JS: Pasang cookie DAN redirect manual */}
         <script dangerouslySetInnerHTML={{ __html: `
-          document.getElementById('finalAction').addEventListener('click', function() {
+          document.getElementById('finalAction').addEventListener('click', function(e) {
+            e.preventDefault(); // Stop link bawaan
             document.cookie = "skip_${code}=true; max-age=600; path=/";
+            window.location.href = "${data.original_url}";
           });
         `}} />
       </main>
