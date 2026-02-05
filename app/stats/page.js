@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useSearchParams } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { siteConfig } from '../../lib/config'; // Panggil config lo
+import { siteConfig } from '../../lib/config';
 
 function StatsContent() {
   const searchParams = useSearchParams();
@@ -16,7 +16,9 @@ function StatsContent() {
   const fetchData = async (code) => {
     if (!code) return;
     setLoading(true);
-    const cleanCode = code.split('/').pop();
+    // Bersihin input kalau user paste full URL
+    const cleanCode = code.replace(/^(?:https?:\/\/)?(?:www\.)?[^\/]+\//, "").split('/').pop();
+    
     const { data: res } = await supabase
       .from('links')
       .select('*')
@@ -24,6 +26,7 @@ function StatsContent() {
       .single();
     
     if (res) setData(res);
+    else setData(null); // Reset kalau gak ketemu
     setLoading(false);
   };
 
@@ -36,95 +39,151 @@ function StatsContent() {
 
   return (
     <>
-      {/* MANUAL METADATA (Biar SEO Jalan di Client Component) */}
+      {/* Import Icon Font */}
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
+      
       <title>{`Link Analytics - ${siteConfig.name}`}</title>
-      <meta name="description" content={`Track your shortened link performance and click analytics on ${siteConfig.name}.`} />
+      <meta name="description" content={`Track your shortened link performance.`} />
 
-      <main style={{ minHeight: '80vh', background: 'radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%)' }}>
-        <div className="container" style={{ padding: '80px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <main style={{ minHeight: '85vh', background: '#f8fafc' }}>
+        <div className="container" style={{ padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           
+          {/* Header Title */}
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '10px' }}>Link Analytics</h1>
-            <p style={{ color: '#64748b' }}>Track your link performance and visitor engagement.</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', background: '#000', borderRadius: '12px', marginBottom: '20px', color: '#fff' }}>
+               <span className="material-symbols-rounded notranslate" style={{ fontSize: '28px' }}>analytics</span>
+            </div>
+            <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '10px', color: '#0f172a' }}>Link Analytics</h1>
+            <p style={{ color: '#64748b', fontSize: '0.95rem' }}>Monitor your traffic performance in real-time.</p>
           </div>
 
+          {/* Search Box - Border Lebih Tajam */}
           <div style={{ 
             background: '#fff', 
-            padding: '10px', 
-            borderRadius: '20px', 
-            boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+            padding: '8px', 
+            borderRadius: '12px', // Radius dikurangi (sebelumnya 20px)
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
             display: 'flex',
             width: '100%',
             maxWidth: '500px',
             marginBottom: '40px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid #e2e8f0',
+            alignItems: 'center'
           }}>
+            <span className="material-symbols-rounded notranslate" style={{ color: '#94a3b8', marginLeft: '12px', fontSize: '20px' }}>search</span>
             <input 
               type="text" 
               value={inputUrl} 
               onChange={(e) => setInputUrl(e.target.value)}
-              placeholder="Enter your short code or link..." 
-              style={{ flex: 1, border: 'none', padding: '12px 20px', outline: 'none', fontSize: '1rem', background: 'transparent' }}
+              placeholder="Paste short code (e.g., Nmc7jS)" 
+              style={{ flex: 1, border: 'none', padding: '12px', outline: 'none', fontSize: '0.95rem', background: 'transparent', color: '#334155' }}
             />
             <button 
               onClick={() => fetchData(inputUrl)} 
-              className="btn-black" 
-              style={{ borderRadius: '14px', padding: '0 25px' }}
+              style={{ 
+                background: '#000', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: '8px', // Radius tajam
+                padding: '10px 24px', 
+                cursor: 'pointer', 
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
             >
               {loading ? '...' : 'Track'}
             </button>
           </div>
 
+          {/* Result Card */}
           {data ? (
-            <div style={{ width: '100%', maxWidth: '600px', animation: 'fadeIn 0.5s ease' }}>
+            <div style={{ width: '100%', maxWidth: '500px', animation: 'fadeIn 0.5s ease' }}>
               <div style={{ 
                 background: '#fff', 
-                padding: '30px', 
-                borderRadius: '24px', 
+                borderRadius: '16px', // Radius tajam
                 border: '1px solid #e2e8f0',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.04)'
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+                overflow: 'hidden'
               }}>
-                <div style={{ marginBottom: '25px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Engagement</span>
-                  <h2 style={{ fontSize: '4rem', fontWeight: '900', margin: '5px 0' }}>{data.clicks || 0}</h2>
-                  <p style={{ color: '#64748b' }}>Total Clicks</p>
+                
+                {/* Big Number Stats */}
+                <div style={{ padding: '40px 20px', textAlign: 'center', borderBottom: '1px solid #f1f5f9', background: 'linear-gradient(to bottom, #ffffff, #f8fafc)' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <span className="material-symbols-rounded notranslate" style={{ fontSize: '18px' }}>bar_chart</span> Total Clicks
+                  </span>
+                  <h2 className="notranslate" style={{ fontSize: '4.5rem', fontWeight: '900', margin: '10px 0', color: '#0f172a', lineHeight: '1' }}>
+                    {data.clicks || 0}
+                  </h2>
                 </div>
 
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <span style={{ color: '#64748b' }}>Original URL</span>
-                    <span style={{ fontWeight: '600', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {data.original_url}
-                    </span>
+                {/* Details List */}
+                <div style={{ padding: '24px' }}>
+                  
+                  {/* Item 1: Original URL */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '20px', gap: '15px' }}>
+                    <div style={{ padding: '8px', background: '#eff6ff', borderRadius: '8px', color: '#2563eb' }}>
+                      <span className="material-symbols-rounded notranslate" style={{ fontSize: '20px', display: 'block' }}>link</span>
+                    </div>
+                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                      <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>Destination URL</span>
+                      <a href={data.original_url} target="_blank" rel="noopener noreferrer" className="notranslate" style={{ display: 'block', color: '#0f172a', fontWeight: '600', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.95rem' }}>
+                        {data.original_url}
+                      </a>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <span style={{ color: '#64748b' }}>Short Alias</span>
-                    <span style={{ fontWeight: '600', color: 'var(--accent)' }}>{data.slug}</span>
+
+                  {/* Item 2: Short Code */}
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '15px' }}>
+                    <div style={{ padding: '8px', background: '#f0fdf4', borderRadius: '8px', color: '#16a34a' }}>
+                      <span className="material-symbols-rounded notranslate" style={{ fontSize: '20px', display: 'block' }}>tag</span>
+                    </div>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>Short Alias</span>
+                      <span className="notranslate" style={{ color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}>{data.slug}</span>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#64748b' }}>Created Date</span>
-                    <span style={{ fontWeight: '600' }}>{new Date(data.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+
+                  {/* Item 3: Date */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ padding: '8px', background: '#f1f5f9', borderRadius: '8px', color: '#475569' }}>
+                      <span className="material-symbols-rounded notranslate" style={{ fontSize: '20px', display: 'block' }}>calendar_today</span>
+                    </div>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>Created</span>
+                      <span className="notranslate" style={{ color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}>
+                        {new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
                   </div>
+
                 </div>
               </div>
             </div>
           ) : !loading && autoSlug && (
-            <div style={{ color: '#ef4444' }}>Link not found. Please check your code.</div>
+            <div style={{ padding: '20px', background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '12px', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span className="material-symbols-rounded notranslate">error</span>
+              Link not found in our database.
+            </div>
           )}
 
-          <div style={{ marginTop: '80px', width: '100%', maxWidth: '800px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px' }}>
-            <div style={{ textAlign: 'left' }}>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Real-time Tracking</h3>
-              <p style={{ color: '#64748b', lineHeight: '1.6', fontSize: '0.9rem' }}>
-                We provide accurate, real-time data for every click your link receives. Monitor your traffic as it happens.
-              </p>
-            </div>
-            <div style={{ textAlign: 'left' }}>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Data Privacy</h3>
-              <p style={{ color: '#64748b', lineHeight: '1.6', fontSize: '0.9rem' }}>
-                Your analytics are secure. We only track essential engagement metrics to help you understand your reach.
-              </p>
-            </div>
+          {/* Info Grid */}
+          <div style={{ marginTop: '60px', width: '100%', maxWidth: '800px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+             <div style={{ padding: '20px', background: '#fff', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                 <span className="material-symbols-rounded notranslate" style={{ color: '#2563eb' }}>bolt</span>
+                 <h3 style={{ fontSize: '1rem', fontWeight: '700' }}>Real-time Data</h3>
+               </div>
+               <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: '1.5' }}>Clicks are updated instantly. Monitor traffic spikes as they happen.</p>
+             </div>
+             
+             <div style={{ padding: '20px', background: '#fff', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                 <span className="material-symbols-rounded notranslate" style={{ color: '#16a34a' }}>shield</span>
+                 <h3 style={{ fontSize: '1rem', fontWeight: '700' }}>Privacy First</h3>
+               </div>
+               <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: '1.5' }}>We only count hits. No personal user data is stored or shared.</p>
+             </div>
           </div>
 
         </div>
@@ -144,9 +203,8 @@ export default function StatsPage() {
     <>
       <Header />
       <Suspense fallback={
-        <div className="container" style={{ padding: '100px', textAlign: 'center' }}>
-          <div className="loading-spinner"></div>
-          <p>Analyzing link data...</p>
+        <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ color: '#94a3b8' }}>Loading analytics...</span>
         </div>
       }>
         <StatsContent />
