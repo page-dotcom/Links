@@ -17,40 +17,46 @@ export default async function RedirectPage({ params, searchParams }) {
   const { data } = await supabase.from('links').select('*').eq('slug', code).single();
   if (!data) notFound();
 
-  // FUNGSI HELPER: Biar hitung klik nggak kelewat
+  // FUNGSI HELPER: Wajib pakai AWAIT biar data masuk ke DB sebelum halaman pindah
   const countClick = async () => {
-    await supabase.rpc('increment_clicks', { row_id: data.id });
+    const { error } = await supabase.rpc('increment_clicks', { row_id: data.id });
+    if (error) console.error("Stats Error:", error);
   };
 
-  // 2. JALUR BOT (Agar Meta Preview Muncul)
+  // 2. JALUR BOT (Agar Meta Preview Muncul dari URL Tujuan)
   const userAgent = userHeaders.get('user-agent') || '';
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot/i.test(userAgent);
   if (isBot) {
-    // Bot nggak perlu dihitung kliknya biar statistik lo asli manusia
     return redirect(data.original_url);
   }
 
-  // 3. JALUR KLIK KEDUA (Cookie aktif -> Langsung Redirect)
+  // 3. JALUR KLIK KEDUA (Sudah ada cookie -> Langsung Redirect)
   if (hasConfirmed) {
-    await countClick(); // Hitung klik dulu sebelum kabur
+    await countClick(); // Hitung klik otomatis untuk user lama
     return redirect(data.original_url);
   }
 
-  // 4. JALUR KLIK PERTAMA (Belum ada ?a=confirm -> Paksa pindah URL)
+  // 4. JALUR KLIK PERTAMA - TAHAP REDIRECT URL (Menambahkan ?a=confirm)
   if (!isConfirmAction) {
     return redirect(`/${code}?a=confirm`);
   }
 
-  // 5. TAMPILAN HALAMAN KONFIRMASI (User beneran mampir di sini)
+  // 5. JALUR KLIK PERTAMA - TAHAP HITUNG KLIK (Saat tombol Continue diklik)
+  // Ini kunci biar statistik lo gak bocor
+  if (isConfirmAction && hasConfirmed) {
+     await countClick();
+     return redirect(data.original_url);
+  }
+
   return (
     <>
       <Header />
-      {/* HISTATS TRACKER - Pasang di sini agar kunjungan halaman konfirmasi terhitung */}
+      {/* HISTATS TRACKER */}
       <script dangerouslySetInnerHTML={{ __html: `
-        // Masukkan kode Histats lo di sini kalau mau tracking halaman jembatan
+        // Paste kode Histats lo di sini
       `}} />
 
-      <main style={{  minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '480px', width: '100%', textAlign: 'left' }}>
           
           <h2 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>
@@ -88,7 +94,7 @@ export default async function RedirectPage({ params, searchParams }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#888', fontSize: '0.8rem', borderTop: '1px solid #eee', paddingTop: '20px' }}>
             <div style={{ display: 'flex', gap: '10px' }}>
               <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>lightbulb</span>
-              <p style={{ margin: 0 }}>If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding. Report the link if you think it's suspicious.</p>
+              <p style={{ margin: 0 }}>If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding.</p>
             </div>
             <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', textDecoration: 'none', fontWeight: '700' }}>
               <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>flag</span>
