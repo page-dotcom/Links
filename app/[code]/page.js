@@ -1,10 +1,11 @@
 import { supabase } from '../../lib/supabase';
+import { siteConfig } from '../../lib/config';
 import { redirect, notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
-// PENTING: Paksa server render ulang tiap akses biar tracking jalan
+// PENTING: Paksa server render ulang tiap akses biar tracking jalan akurat
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -16,8 +17,8 @@ export default async function RedirectPage({ params }) {
   const { data } = await supabase.from('links').select('*').eq('slug', code).single();
   if (!data) notFound();
 
-  // 2. DETEKSI BOT SOSMED (WA, FB, IG, Twitter, dll)
-  // Ini SOLUSI PREVIEW: Kalo bot, lempar langsung ke tujuan biar dia ambil gambar dari sana
+  // 2. DETEKSI BOT SOSMED (WA, FB, dll)
+  // Ini biar PREVIEW LINK ASLI MUNCUL. Bot langsung dilempar, gak dihitung kliknya (opsional).
   const userAgent = userHeaders.get('user-agent') || '';
   const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot|linkedinbot|embedly|slackbot|discordbot/i.test(userAgent);
 
@@ -25,11 +26,12 @@ export default async function RedirectPage({ params }) {
     return redirect(data.original_url);
   }
 
-  // 3. TRACKING KLIK (MANUSIA)
-  // Langsung hitung klik begitu halaman dibuka manusia. Gak perlu nunggu tombol diklik.
+  // 3. TRACKING KLIK (HANYA DISINI!)
+  // Klik dihitung SAAT HALAMAN DIMUAT.
+  // Tidak ada tracking lagi di tombol continue. Jadi total = 1.
   await supabase.rpc('increment_clicks', { row_id: data.id });
 
-  // 4. TAMPILKAN HALAMAN KONFIRMASI (LANGSUNG, TANPA REDIRECT URL)
+  // 4. TAMPILKAN HALAMAN KONFIRMASI
   return (
     <>
       <Header />
@@ -52,7 +54,7 @@ export default async function RedirectPage({ params }) {
           </div>
 
           <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. <strong>We never ask for your sensitive details.</strong>
+          This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
           </p>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
@@ -60,12 +62,13 @@ export default async function RedirectPage({ params }) {
               Back
             </a>
             
-            {/* TOMBOL CONTINUE: Pake JavaScript Inline biar pasti jalan */}
+            {/* TOMBOL CONTINUE MURNI */}
+            {/* Perhatikan: Gak ada logic supabase/tracking disini. Cuma murni pindah halaman. */}
             <a 
               href={data.original_url}
               onClick={`(function(e){ 
                 e.preventDefault(); 
-                // Langsung ganti halaman ke tujuan
+                // Langsung ganti halaman ke tujuan TANPA lapor database lagi
                 window.location.replace("${data.original_url}"); 
               })(event)`}
               style={{ 
@@ -91,8 +94,6 @@ export default async function RedirectPage({ params }) {
             </a>
           </div>
         </div>
-        
-        {/* Hapus script addEventListener yang bikin error */}
       </main>
       <Footer />
     </>
