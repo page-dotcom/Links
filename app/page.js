@@ -49,7 +49,8 @@ export default function Home() {
     const forbiddenDomains = [
       'links-omega-blush.vercel.app',
       'localhost',
-      '127.0.0.1'
+      '127.0.0.1',
+      'suclt.eu.org'
     ];
 
     try {
