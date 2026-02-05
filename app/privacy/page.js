@@ -4,103 +4,129 @@ import { siteConfig } from '../../lib/config';
 
 export const metadata = {
   title: `Privacy Policy - ${siteConfig.name}`,
-  description: `Read the privacy policy for ${siteConfig.name} (${siteConfig.domain}). Learn how we protect your data and privacy.`,
+  description: `Detailed Privacy Policy for ${siteConfig.name}. Learn how we handle your data, security protocols, and compliance with global privacy standards.`,
 };
 
 export default function PrivacyPolicy() {
-  // Gunakan tanggal statis agar tidak berubah setiap kali di-render (bagus untuk SEO)
   const lastUpdated = "February 5, 2026";
 
   return (
     <>
       <Header />
-      <main style={{ minHeight: '100vh' }}>
+      <main style={{ minHeight: '100vh', paddingTop: '40px' }}>
         <div style={{ 
-          padding: '60px 20px', 
-          maxWidth: '750px', 
+          padding: '40px 24px', 
+          maxWidth: '850px', 
           margin: '0 auto',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' 
+          fontFamily: 'Inter, -apple-system, sans-serif'
         }}>
           
-          {/* Header Section */}
-          <div style={{ textAlign: 'left', marginBottom: '48px', borderBottom: '1px solid #f1f5f9', paddingBottom: '32px' }}>
+          {/* Section 1: Title & Introduction */}
+          <div style={{ marginBottom: '60px', borderBottom: '2px solid #f1f5f9', paddingBottom: '30px' }}>
             <h1 style={{ 
-              fontSize: 'clamp(2rem, 8vw, 3rem)', 
-              fontWeight: '850', 
-              marginBottom: '12px', 
-              color: '#0f172a',
-              letterSpacing: '-0.04em'
+              fontSize: 'clamp(2.5rem, 7vw, 3.5rem)', 
+              fontWeight: '900', 
+              color: '#0f172a', 
+              marginBottom: '15px',
+              letterSpacing: '-0.05em' 
             }}>
               Privacy Policy
             </h1>
-            <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: '500' }}>
-              Last Updated: {lastUpdated}
+            <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: '500' }}>
+              Effective Date: {lastUpdated} | Version 2.0.4
             </p>
           </div>
 
-          {/* Content Section */}
           <div style={{ 
-            lineHeight: '1.75', 
+            lineHeight: '1.8', 
             color: '#334155', 
             fontSize: '1.1rem',
-            textAlign: 'justify' 
+            textAlign: 'left'
           }}>
             
-            <section style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-                1. Overview and Commitment
+            <section style={{ marginBottom: '50px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                1. Comprehensive Commitment to Privacy
               </h2>
               <p style={{ marginBottom: '20px' }}>
-                At <strong>{siteConfig.name}</strong>, accessible via <strong>{siteConfig.domain}</strong>, the privacy of our visitors is our top priority. This document outlines the types of information collected and how we use it to provide a secure URL shortening service.
+                Welcome to <strong>{siteConfig.name}</strong> (accessible at {siteConfig.domain}). We recognize that your privacy is critically important. This Privacy Policy outlines the types of personal and technical information we collect when you use our URL shortening services and how we use, maintain, and protect that information.
               </p>
-              <p>
-                By using our website, you hereby consent to our Privacy Policy. If you have additional questions, do not hesitate to contact our team through the official support channels.
-              </p>
-            </section>
-
-            <section style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-                2. Data Collection and Usage
-              </h2>
-              <p>
-                We collect limited data essential for operation. This primarily includes the original long URLs you provide and generated short links. We may also log standard info like your IP address and browser type to monitor for abuse.
+              <p style={{ marginBottom: '20px' }}>
+                In an era of digital transparency, we are committed to ensuring that your data is handled with the highest standards of security. By utilizing our platform to shorten, manage, or track URLs, you consent to the data practices described in this statement. This policy applies to all visitors, users, and others who access the Service.
               </p>
             </section>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-                3. Cookie Policy and Storage
+            <section style={{ marginBottom: '50px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                2. Data Collection and Information Harvesting
               </h2>
-              <p>
-                <strong>{siteConfig.name}</strong> uses cookies to enhance your experience. Specifically, we store your recent link history locally in your browser. This allows you to manage links without an account.
+              <p style={{ marginBottom: '20px' }}>
+                We collect information in several ways to provide a functional and safe environment. When you use our "Shorten" feature, we store the original "Long URL" and associate it with a unique "Slug" in our secure database.
+              </p>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '15px' }}>2.1 Log Data and Technical Information</h3>
+              <p style={{ marginBottom: '20px' }}>
+                Every time a shortened link is accessed, our servers automatically record certain information. This log data may include your IP address (anonymized in many cases), browser type, browser version, the pages of our Service that you visit, the time and date of your visit, and the time spent on those pages.
+              </p>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '15px' }}>2.2 Analytical Data</h3>
+              <p style={{ marginBottom: '20px' }}>
+                We use internal analytics tools to track the number of clicks on each link. This information is used solely to provide link owners with performance metrics and to monitor the Service for fraudulent activity or violations of our Terms of Service.
               </p>
             </section>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-                4. Advertising and Partners
+            <section style={{ marginBottom: '50px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                3. Advanced Cookie Policy and Tracking
               </h2>
-              <p>
-                Third-party vendors, including Google, use cookies to serve ads based on prior visits to <strong>{siteConfig.domain}</strong>. Google's use of advertising cookies enables it to serve ads to our users based on their visits across the Internet.
+              <p style={{ marginBottom: '20px' }}>
+                Cookies are files with a small amount of data which may include an anonymous unique identifier. <strong>{siteConfig.name}</strong> uses cookies to track your "Recent Links" history locally. This feature is designed for user convenience, allowing you to manage your links without creating a formal account.
+              </p>
+              <p style={{ marginBottom: '20px' }}>
+                You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use the "Recent Links" history feature of our Service. We do not use these cookies for cross-site behavioral tracking or profiling for marketing purposes.
               </p>
             </section>
 
-            <section style={{ marginBottom: '40px', padding: '24px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-                5. Legal Obligations
+            <section style={{ marginBottom: '50px', background: '#f8fafc', padding: '30px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                4. Third-Party Advertising and Google AdSense Compliance
               </h2>
-              <p style={{ fontSize: '0.95rem', fontStyle: 'italic' }}>
-                We will disclose information if required by law to protect our rights, your safety, investigate fraud, or respond to a government request.
+              <p style={{ marginBottom: '20px' }}>
+                We may use third-party advertising companies to serve ads when you visit our website. These companies may use information (not including your name, address, email address, or telephone number) about your visits to this and other websites in order to provide advertisements about goods and services of interest to you.
+              </p>
+              <p style={{ marginBottom: '20px' }}>
+                Google, as a third-party vendor, uses cookies to serve ads on our site. Google's use of the DART cookie enables it to serve ads to our users based on their visit to our site and other sites on the Internet. Users may opt out of the use of the DART cookie by visiting the Google Ad and Content Network privacy policy.
               </p>
             </section>
 
-            <section style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '16px', color: '#0f172a' }}>
-                6. Contact Information
+            <section style={{ marginBottom: '50px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                5. Security Protocols and Infrastructure
               </h2>
+              <p style={{ marginBottom: '20px' }}>
+                The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Information, we cannot guarantee its absolute security.
+              </p>
               <p>
-                Questions? Reach out via email at: <br />
-                <strong style={{ color: '#3b82f6', fontSize: '1.2rem' }}>support@{siteConfig.domain}</strong>
+                We implement SSL (Secure Sockets Layer) encryption for all data transfers and use encrypted database storage to protect the integrity of the shortened URLs and your associated IP logs.
+              </p>
+            </section>
+
+            <section style={{ marginBottom: '50px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                6. Link Content and User Responsibility
+              </h2>
+              <p style={{ marginBottom: '20px' }}>
+                Our Service allows users to shorten any URL. We do not own or control the content of the destination websites. We are not responsible for the privacy practices of such other sites. We encourage our users to be aware when they leave our site and to read the privacy statements of each and every website that collects personally identifiable information.
+              </p>
+            </section>
+
+            <section style={{ marginBottom: '50px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '20px', color: '#0f172a' }}>
+                7. Contact Us for Privacy Concerns
+              </h2>
+              <p style={{ marginBottom: '20px' }}>
+                If you have any questions about this Privacy Policy or wish to report a privacy violation, please contact us at:
+              </p>
+              <p style={{ fontSize: '1.3rem', fontWeight: '700', color: '#3b82f6' }}>
+                support@{siteConfig.domain}
               </p>
             </section>
 
