@@ -1,47 +1,55 @@
+"use client"; // Wajib Client Side biar bisa 'useEffect'
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import { redirect, notFound } from 'next/navigation';
-import { cookies, headers } from 'next/headers';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
-export const dynamic = 'force-dynamic';
-
-export default async function RedirectPage({ params, searchParams }) {
+export default function RedirectPage({ params }) {
   const { code } = params;
-  const isConfirmAction = searchParams.a === 'confirm';
-  const cookieStore = cookies();
-  const userHeaders = headers();
-  const hasConfirmed = cookieStore.get(`skip_${code}`);
-  
-  const { data } = await supabase.from('links').select('*').eq('slug', code).single();
-  if (!data) notFound();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const hasCounted = useRef(false); // Penjaga biar gak ngitung dobel
 
-  const track = async () => {
-    await supabase.rpc('increment_clicks', { row_id: data.id });
+  useEffect(() => {
+    async function init() {
+      // 1. Ambil data link
+      const { data: linkData, error } = await supabase
+        .from('links')
+        .select('*')
+        .eq('slug', code)
+        .single();
+
+      if (error || !linkData) {
+        window.location.href = '/'; // Kalo link gak ada, balik home
+        return;
+      }
+      
+      setData(linkData);
+      setLoading(false);
+
+      // 2. HITUNG PENGUNJUNG OTOMATIS (Tanpa Klik Tombol)
+      // Begitu halaman loading selesai, langsung tembak database
+      if (!hasCounted.current) {
+        hasCounted.current = true;
+        await supabase.rpc('increment_clicks', { row_id: linkData.id });
+      }
+    }
+
+    init();
+  }, [code]);
+
+  // Fungsi Tombol Continue (Cuma buat redirect, gak usah ngitung lagi)
+  const handleContinue = () => {
+    if (data) {
+      window.location.href = data.original_url;
+    }
   };
 
-  const userAgent = userHeaders.get('user-agent') || '';
-  const isBot = /facebookexternalhit|whatsapp|telegram|twitterbot|bingbot|googlebot/i.test(userAgent);
-  if (isBot) return redirect(data.original_url);
-
-  if (hasConfirmed) {
-    await track(); 
-    return redirect(data.original_url);
-  }
-
-  if (!isConfirmAction) {
-    return redirect(`/${code}?a=confirm`);
-  }
-
-  if (isConfirmAction && hasConfirmed) {
-    await track();
-    return redirect(data.original_url);
-  }
+  if (loading) return <div style={{ minHeight: '100vh', background: '#fff' }}></div>;
 
   return (
     <>
       <Header />
-      {/* Import Google Icon Font */}
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
       
       <main style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
@@ -57,7 +65,7 @@ export default async function RedirectPage({ params, searchParams }) {
             wordBreak: 'break-all', marginBottom: '24px', border: '1px solid #333',
             lineHeight: '1.5'
           }}>
-            {data.original_url}
+            {data?.original_url}
           </div>
 
           <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
@@ -69,56 +77,32 @@ export default async function RedirectPage({ params, searchParams }) {
               Back
             </a>
             
-            {/* PERBAIKAN DI SINI: Pake 'onClick' inline biar 100% jalan */}
-            <a 
-              href={data.original_url}
-              onClick={`(function(e){ 
-                e.preventDefault(); 
-                document.cookie = "skip_${code}=true; max-age=600; path=/"; 
-                window.location.href = "${data.original_url}"; 
-              })(event)`}
+            {/* Tombol Continue Langsung Jalan */}
+            <button 
+              onClick={handleContinue}
               style={{ 
-                flex: 1, textAlign: 'center', padding: '16px', background: '#000', color: '#fff', 
-                borderRadius: '8px', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '700',
+                flex: 1, padding: '16px', background: '#000', color: '#fff', 
+                borderRadius: '8px', border: 'none', fontSize: '0.9rem', fontWeight: '700',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer'
               }}
             >
               Continue <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '20px' }}>arrow_forward</span>
-            </a>
+            </button>
           </div>
 
-          {/* AREA REPORT & INFO - Rapi & Presisi */}
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', color: '#64748b', fontSize: '0.85rem', lineHeight: '1.5' }}>
               <span className="material-symbols-rounded notranslate" translate="no" style={{ color: '#000', fontSize: '22px' }}>lightbulb</span>
               <p style={{ margin: 0 }}>
                 If you receive this link in an email, phone call, or other suspicious message, please double-check before proceeding. Report the link if you think it's suspicious.
               </p>
             </div>
-
-            <a 
-              href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data.original_url)}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '10px', 
-                color: '#000', 
-                textDecoration: 'none', 
-                fontWeight: '700', 
-                fontSize: '0.9rem' 
-              }}
-            >
+            <a href={`https://www.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(data?.original_url)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#000', textDecoration: 'none', fontWeight: '700', fontSize: '0.9rem' }}>
               <span className="material-symbols-rounded notranslate" translate="no" style={{ fontSize: '22px' }}>flag</span>
               Report suspicious link
             </a>
-
           </div>
         </div>
-
-        {/* Script bawah dihapus karena sudah dipindah ke inline onClick di atas biar pasti jalan */}
       </main>
       <Footer />
     </>
