@@ -59,6 +59,21 @@ export default function RootLayout({ children }) {
           src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
           strategy="lazyOnload" 
         />
+
+
+
+         <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-REWSLF6H28"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-REWSLF6H28');
+          `}
+        </Script>   
       </head>
       <body style={{ margin: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {children}
