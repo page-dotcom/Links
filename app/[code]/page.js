@@ -1,6 +1,7 @@
 "use client"; // Wajib Client Side biar bisa 'useEffect'
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
+import { siteConfig } from '../../lib/config';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
@@ -69,7 +70,7 @@ export default function RedirectPage({ params }) {
           </div>
 
           <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#333', marginBottom: '32px' }}>
-            This link was created by a <strong>public user</strong>. Please check the destination link above before proceeding. <strong>We never ask for your sensitive details.</strong>
+          This link was created by a <strong>public user.</strong> Please verify the link above before proceeding. <strong><u>We {siteConfig.domain} never ask for your personal information.</u></strong>
           </p>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
