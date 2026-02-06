@@ -77,9 +77,12 @@ export default function AdminPage() {
   };
 
   const handleCopy = (slug) => {
-    const fullUrl = `${window.location.origin}/${slug}`;
+    // Ambil alamat website, terus hapus 'www.' kalau ada
+    const cleanOrigin = window.location.origin.replace('www.', '');
+    const fullUrl = `${cleanOrigin}/${slug}`;
+    
     navigator.clipboard.writeText(fullUrl).then(() => {
-      showToast("Link disalin ke clipboard");
+      showToast("Link berhasil disalin!");
     });
   };
 
