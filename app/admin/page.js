@@ -3,18 +3,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRouter } from 'next/navigation';
 
-// --- TOAST COMPONENT (Notifikasi) ---
+// --- NEW TOAST (Model Snackar/Pil Hitam) ---
 const Toast = ({ message, type, onClose }) => {
   if (!message) return null;
-  const isError = type === 'error';
   return (
-    <div className="spf_toast" style={{ borderLeftColor: isError ? '#ef4444' : '#10b981' }}>
-      <span className="material-symbols-rounded" style={{ color: isError ? '#ef4444' : '#10b981' }}>
-        {isError ? 'error' : 'check_circle'}
+    <div className="spf_snackbar">
+      <span className="material-symbols-rounded icon">
+        {type === 'error' ? 'error' : 'check_circle'}
       </span>
-      <div style={{ flex: 1 }}>
-        <p className="spf_toast_msg">{message}</p>
-      </div>
+      <span>{message}</span>
     </div>
   );
 };
@@ -29,7 +26,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const PAGE_SIZE = 15;
+  const PAGE_SIZE = 20; // Tampil lebih banyak karena full screen
 
   // UI
   const [editingLink, setEditingLink] = useState(null);
@@ -82,15 +79,15 @@ export default function AdminPage() {
   const handleCopy = (slug) => {
     const fullUrl = `${window.location.origin}/${slug}`;
     navigator.clipboard.writeText(fullUrl).then(() => {
-      showToast("Link berhasil disalin!");
+      showToast("Link disalin ke clipboard");
     });
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Hapus link ini permanen?")) return;
+    if (!confirm("Hapus link ini?")) return;
     const { error } = await supabase.from('links').delete().eq('id', id);
     if (!error) {
-      showToast("Link dihapus");
+      showToast("Link berhasil dihapus");
       fetchLinks(page, search);
     } else showToast("Gagal hapus", "error");
   };
@@ -99,10 +96,10 @@ export default function AdminPage() {
     e.preventDefault();
     const { error } = await supabase.from('links').update({ slug: editingLink.slug, original_url: editingLink.original_url }).eq('id', editingLink.id);
     if (!error) {
-      showToast("Update sukses");
+      showToast("Link berhasil diupdate");
       setEditingLink(null);
       fetchLinks(page, search);
-    } else showToast("Slug mungkin sudah ada", "error");
+    } else showToast("Gagal update", "error");
   };
 
   const handleLogout = async () => {
@@ -112,299 +109,280 @@ export default function AdminPage() {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  if (loading && !links.length) return <div className="spf_loading">Loading Dashboard...</div>;
+  if (loading && !links.length) return <div className="spf_loading">Loading...</div>;
 
   return (
     <>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,fill,GRAD@20..48,100..700,0..1,-50..200" />
       <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: '' })} />
 
-      <div className="spf_body">
+      <div className="spf_layout">
         
-        {/* TOPBAR */}
-        <nav className="spf_navbar">
+        {/* TOPBAR FULL WIDTH */}
+        <header className="spf_header">
           <div className="spf_brand">
-            <span className="material-symbols-rounded">admin_panel_settings</span>
-            <span>Admin Panel</span>
+            <span className="material-symbols-rounded">dashboard</span>
+            <span>Link Manager</span>
           </div>
-          <button onClick={handleLogout} className="spf_btn_logout">
-            <span className="material-symbols-rounded">logout</span>
-          </button>
-        </nav>
+          <div className="spf_header_right">
+            <span className="spf_total_badge">{totalCount} Links</span>
+            <button onClick={handleLogout} className="spf_logout_btn">
+              <span className="material-symbols-rounded">logout</span>
+            </button>
+          </div>
+        </header>
 
-        {/* CONTENT */}
-        <div className="spf_container">
-          
-          {/* STATS & SEARCH (Stack on Mobile) */}
-          <div className="spf_toolbar">
-            <div className="spf_stat_box">
-              <span className="label">Total Links</span>
-              <span className="count">{totalCount}</span>
-            </div>
-
-            <div className="spf_search_box">
-              <input 
+        {/* TOOLBAR (SEARCH) */}
+        <div className="spf_toolbar">
+          <div className="spf_search_wrap">
+             <span className="material-symbols-rounded search-icon">search</span>
+             <input 
                 type="text" 
-                placeholder="Search..." 
+                placeholder="Cari link..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && fetchLinks(1, search)}
-              />
-              <span className="material-symbols-rounded icon">search</span>
-            </div>
+             />
           </div>
-
-          {/* TABLE WRAPPER (SCROLLABLE) */}
-          <div className="spf_table_card">
-            <div className="spf_scroll_area">
-              <table className="spf_table">
-                <thead>
-                  <tr>
-                    <th style={{ width: '150px' }}>Short Link</th>
-                    <th style={{ width: '300px' }}>Destination</th>
-                    <th style={{ width: '100px' }} className="center">Date</th>
-                    <th style={{ width: '80px' }} className="center">Hits</th>
-                    <th style={{ width: '100px' }} className="right">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {links.map((link) => (
-                    <tr key={link.id}>
-                      {/* SHORT LINK & COPY BUTTON */}
-                      <td>
-                        <div className="spf_short_col">
-                          <span className="slug">/{link.slug}</span>
-                          <button onClick={() => handleCopy(link.slug)} className="spf_btn_copy" title="Copy">
-                            <span className="material-symbols-rounded">content_copy</span>
-                          </button>
-                        </div>
-                      </td>
-                      
-                      {/* DESTINATION (Truncated) */}
-                      <td>
-                        <div className="spf_url_text" title={link.original_url}>
-                          {link.original_url}
-                        </div>
-                      </td>
-
-                      {/* DATE */}
-                      <td className="center">
-                        <span className="date-text">
-                          {new Date(link.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                        </span>
-                      </td>
-
-                      {/* HITS */}
-                      <td className="center">
-                        <span className="spf_badge">{link.clicks}</span>
-                      </td>
-
-                      {/* ACTIONS */}
-                      <td className="right">
-                        <div className="spf_actions">
-                          <button onClick={() => setEditingLink(link)} className="spf_icon_btn edit">
-                            <span className="material-symbols-rounded">edit</span>
-                          </button>
-                          <button onClick={() => handleDelete(link.id)} className="spf_icon_btn del">
-                            <span className="material-symbols-rounded">delete</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {links.length === 0 && (
-                    <tr><td colSpan="5" className="empty-msg">No links found.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* PAGINATION */}
-            <div className="spf_pagination">
-              <button onClick={() => fetchLinks(page - 1, search)} disabled={page === 1} className="page-btn">Prev</button>
-              <span className="page-info">{page} / {totalPages || 1}</span>
-              <button onClick={() => fetchLinks(page + 1, search)} disabled={page === totalPages} className="page-btn">Next</button>
-            </div>
-          </div>
-
         </div>
+
+        {/* TABLE AREA - FULL WIDTH & FLAT */}
+        <div className="spf_table_container">
+          <table className="spf_table">
+            <thead>
+              <tr>
+                <th width="15%">CREATED</th>
+                <th width="20%">SHORT LINK</th>
+                <th width="40%">DESTINATION</th>
+                <th width="10%" className="text-center">CLICKS</th>
+                <th width="15%" className="text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {links.map((link) => (
+                <tr key={link.id}>
+                  <td>
+                    <span className="spf_date">
+                      {new Date(link.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="spf_short_row">
+                      <a href={`/${link.slug}`} target="_blank" className="spf_slug_link">/{link.slug}</a>
+                      <button onClick={() => handleCopy(link.slug)} className="spf_icon_action copy" title="Copy">
+                        <span className="material-symbols-rounded">content_copy</span>
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="spf_long_url">{link.original_url}</div>
+                  </td>
+                  <td className="text-center">
+                    <span className="spf_click_count">{link.clicks}</span>
+                  </td>
+                  <td className="text-right">
+                    <div className="spf_action_group">
+                      <button onClick={() => setEditingLink(link)} className="spf_icon_action edit">
+                        <span className="material-symbols-rounded">edit</span>
+                      </button>
+                      <button onClick={() => handleDelete(link.id)} className="spf_icon_action del">
+                        <span className="material-symbols-rounded">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {links.length === 0 && (
+                <tr><td colSpan="5" className="spf_empty">Tidak ada data link.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* PAGINATION - FLAT */}
+        <div className="spf_pagination">
+          <button onClick={() => fetchLinks(page - 1, search)} disabled={page === 1}>Prev</button>
+          <span>Page {page} / {totalPages || 1}</span>
+          <button onClick={() => fetchLinks(page + 1, search)} disabled={page === totalPages}>Next</button>
+        </div>
+
       </div>
 
-      {/* MODAL EDIT */}
+      {/* MODAL EDIT - TAJAM */}
       {editingLink && (
         <div className="spf_modal_overlay">
           <div className="spf_modal">
-            <h3>Edit Link</h3>
-            <label>Short Code</label>
-            <input type="text" value={editingLink.slug} onChange={(e) => setEditingLink({...editingLink, slug: e.target.value})} />
-            <label>Original URL</label>
-            <textarea rows={3} value={editingLink.original_url} onChange={(e) => setEditingLink({...editingLink, original_url: e.target.value})} />
-            <div className="spf_modal_btns">
-              <button onClick={() => setEditingLink(null)} className="cancel">Cancel</button>
-              <button onClick={handleUpdate} className="save">Save</button>
+            <div className="spf_modal_head">
+               <h3>Edit Link</h3>
+               <button onClick={() => setEditingLink(null)}><span className="material-symbols-rounded">close</span></button>
+            </div>
+            <div className="spf_modal_body">
+              <label>Short Slug</label>
+              <input type="text" value={editingLink.slug} onChange={(e) => setEditingLink({...editingLink, slug: e.target.value})} />
+              
+              <label>Original URL</label>
+              <textarea rows={3} value={editingLink.original_url} onChange={(e) => setEditingLink({...editingLink, original_url: e.target.value})} />
+              
+              <button onClick={handleUpdate} className="spf_save_btn">Simpan Perubahan</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* GLOBAL RESET */}
+      {/* GLOBAL RESET & CSS */}
       <style jsx global>{`
-        body { margin: 0; padding: 0; background-color: #f8fafc; }
-        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background: #fff; font-family: sans-serif; }
       `}</style>
 
-      {/* CSS KHUSUS HALAMAN INI */}
       <style jsx>{`
-        .spf_body {
-          font-family: system-ui, -apple-system, sans-serif;
+        .spf_layout {
+          width: 100%;
           min-height: 100vh;
-          background: #f8fafc;
-          padding-bottom: 40px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
         }
 
-        /* NAVBAR */
-        .spf_navbar {
-          background: #fff; height: 60px; padding: 0 20px;
-          display: flex; align-items: center; justify-content: space-between;
-          border-bottom: 1px solid #e2e8f0;
-          position: sticky; top: 0; z-index: 100;
+        /* HEADER */
+        .spf_header {
+          height: 60px;
+          border-bottom: 1px solid #e5e7eb;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 20px;
+          position: sticky; top: 0; background: #fff; z-index: 10;
         }
-        .spf_brand { font-weight: 800; font-size: 1.1rem; display: flex; gap: 8px; align-items: center; color: #0f172a; }
-        .spf_btn_logout {
-          background: #fee2e2; border: none; color: #ef4444; width: 36px; height: 36px;
-          border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
+        .spf_brand { font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: #111; }
+        .spf_header_right { display: flex; align-items: center; gap: 15px; }
+        .spf_total_badge { background: #f3f4f6; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; color: #374151; }
+        .spf_logout_btn { border: none; background: transparent; cursor: pointer; color: #ef4444; display: flex; align-items: center; }
 
-        /* CONTAINER */
-        .spf_container {
-          max-width: 1200px; margin: 0 auto; padding: 20px;
-        }
-
-        /* TOOLBAR (STATS & SEARCH) */
+        /* TOOLBAR */
         .spf_toolbar {
-          display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
-        }
-        .spf_stat_box {
-          background: #0f172a; color: #fff; padding: 15px 25px; border-radius: 12px;
-          flex: 1; min-width: 150px; display: flex; flex-direction: column; justify-content: center;
-        }
-        .spf_stat_box .label { font-size: 0.8rem; opacity: 0.8; }
-        .spf_stat_box .count { font-size: 1.8rem; font-weight: 800; line-height: 1.2; }
-
-        .spf_search_box {
-          flex: 2; min-width: 250px; position: relative;
-        }
-        .spf_search_box input {
-          width: 100%; height: 100%; padding: 15px 15px 15px 45px;
-          border-radius: 12px; border: 1px solid #e2e8f0; outline: none; font-size: 1rem;
+          padding: 20px;
           background: #fff;
         }
-        .spf_search_box .icon {
-          position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-          color: #94a3b8;
+        .spf_search_wrap {
+          position: relative;
+          width: 100%;
         }
+        .spf_search_wrap input {
+          width: 100%; padding: 12px 12px 12px 40px;
+          border: 1px solid #e5e7eb;
+          background: #f9fafb;
+          font-size: 1rem;
+          outline: none;
+        }
+        .spf_search_wrap input:focus { border-color: #000; background: #fff; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
 
-        /* TABLE CARD */
-        .spf_table_card {
-          background: #fff; border-radius: 16px; border: 1px solid #e2e8f0;
-          overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        /* TABLE - FULL WIDTH & FLAT */
+        .spf_table_container {
+          flex: 1;
+          overflow-x: auto; /* Scroll samping aktif di HP */
+          width: 100%;
         }
-        
-        /* SCROLL AREA - INI KUNCINYA BIAR GAK JEBOL */
-        .spf_scroll_area {
-          width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-        }
-
         .spf_table {
-          width: 100%; min-width: 800px; /* Lebar minimum biar kolom gak gepeng */
+          width: 100%;
+          min-width: 800px; /* Biar di HP gak gepeng, tapi bisa discroll */
           border-collapse: collapse;
         }
-        
         .spf_table th {
-          text-align: left; padding: 16px; background: #f1f5f9;
-          font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;
-          border-bottom: 1px solid #e2e8f0;
+          text-align: left;
+          padding: 15px 20px;
+          border-bottom: 2px solid #e5e7eb;
+          font-size: 0.75rem;
+          font-weight: 800;
+          color: #6b7280;
+          text-transform: uppercase;
         }
         .spf_table td {
-          padding: 14px 16px; border-bottom: 1px solid #f8fafc;
-          font-size: 0.9rem; vertical-align: middle; color: #334155;
+          padding: 15px 20px;
+          border-bottom: 1px solid #f3f4f6;
+          font-size: 0.9rem;
+          color: #1f2937;
+          vertical-align: middle;
         }
+        .spf_table tr:hover { background: #f9fafb; }
 
-        /* HELPERS */
-        .center { text-align: center; }
-        .right { text-align: right; }
-        .slug { color: #2563eb; font-weight: 600; }
-        .date-text { color: #64748b; font-size: 0.85rem; }
-
-        /* SHORT LINK CELL (Text + Button) */
-        .spf_short_col { display: flex; align-items: center; gap: 8px; }
-        .spf_btn_copy {
-          background: #eff6ff; border: 1px solid #dbeafe; color: #2563eb;
-          width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
+        /* CONTENT STYLES */
+        .spf_date { color: #6b7280; font-size: 0.85rem; }
+        .spf_short_row { display: flex; align-items: center; gap: 10px; }
+        .spf_slug_link { color: #2563eb; font-weight: 600; text-decoration: none; }
+        .spf_long_url { 
+          max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #6b7280; 
         }
-        .spf_btn_copy:active { background: #2563eb; color: #fff; }
+        .spf_click_count { font-weight: 800; }
+        
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
 
-        /* URL TRUNCATE */
-        .spf_url_text {
-          max-width: 280px; white-space: nowrap; overflow: hidden;
-          text-overflow: ellipsis; color: #64748b;
+        /* BUTTONS */
+        .spf_icon_action {
+          width: 32px; height: 32px;
+          border: none; background: transparent;
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          color: #6b7280;
         }
-
-        /* BADGE */
-        .spf_badge {
-          background: #f1f5f9; padding: 4px 10px; border-radius: 20px;
-          font-weight: bold; font-size: 0.8rem;
-        }
-
-        /* ACTIONS */
-        .spf_actions { display: flex; gap: 6px; justify-content: flex-end; }
-        .spf_icon_btn {
-          width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .edit { background: #fff; border: 1px solid #cbd5e1; color: #475569; }
-        .del { background: #fff; border: 1px solid #fca5a5; color: #ef4444; }
+        .spf_icon_action:hover { background: #f3f4f6; color: #000; }
+        .copy { color: #2563eb; background: #eff6ff; }
+        .del { color: #ef4444; }
+        
+        .spf_action_group { display: flex; justify-content: flex-end; gap: 5px; }
 
         /* PAGINATION */
         .spf_pagination {
-          padding: 15px; border-top: 1px solid #e2e8f0;
-          display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+          padding: 20px;
+          border-top: 1px solid #e5e7eb;
+          display: flex; justify-content: center; align-items: center; gap: 20px;
         }
-        .page-btn {
-          padding: 6px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;
-          font-weight: 600; cursor: pointer; font-size: 0.85rem;
+        .spf_pagination button {
+          padding: 8px 16px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer;
         }
-        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .page-info { font-size: 0.85rem; color: #64748b; }
+        .spf_pagination button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
 
-        /* TOAST */
-        .spf_toast {
-          position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-          background: #fff; padding: 12px 16px; border-radius: 10px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-left: 4px solid #333;
+        /* SNACKBAR / TOAST (Notif Pil) */
+        .spf_snackbar {
+          position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+          background: #1f2937; color: #fff;
+          padding: 12px 24px;
           display: flex; align-items: center; gap: 10px;
+          z-index: 9999;
+          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+          min-width: 300px; justify-content: center;
+          animation: fadeUp 0.3s ease-out;
         }
-        .spf_toast_msg { margin: 0; font-size: 0.9rem; font-weight: 600; color: #334155; }
+        .spf_snackbar .icon { font-size: 20px; color: #4ade80; }
+        @keyframes fadeUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
         /* MODAL */
         .spf_modal_overlay {
           position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px;
+          background: rgba(0,0,0,0.5); z-index: 200;
+          display: flex; align-items: center; justify-content: center;
         }
         .spf_modal {
-          background: #fff; padding: 25px; border-radius: 16px; width: 100%; max-width: 450px;
-          display: flex; flex-direction: column; gap: 12px;
+          background: #fff; width: 100%; max-width: 500px;
+          box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
-        .spf_modal input, .spf_modal textarea {
-          width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none;
+        .spf_modal_head {
+          padding: 20px; border-bottom: 1px solid #e5e7eb;
+          display: flex; justify-content: space-between; align-items: center;
         }
-        .spf_modal_btns { display: flex; gap: 10px; margin-top: 10px; }
-        .save { flex: 1; padding: 12px; background: #0f172a; color: #fff; border: none; border-radius: 8px; font-weight: bold; }
-        .cancel { flex: 1; padding: 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: bold; }
+        .spf_modal_head h3 { margin: 0; }
+        .spf_modal_head button { border: none; background: transparent; cursor: pointer; }
         
-        .spf_loading { height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
-        .empty-msg { text-align: center; padding: 40px; color: #94a3b8; }
+        .spf_modal_body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .spf_modal_body input, .spf_modal_body textarea {
+          width: 100%; padding: 12px; border: 1px solid #d1d5db; outline: none; font-size: 1rem;
+        }
+        .spf_save_btn {
+          padding: 14px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+
+        .spf_loading { height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff; color: #6b7280; }
+        .spf_empty { text-align: center; padding: 40px; color: #9ca3af; }
       `}</style>
     </>
   );
